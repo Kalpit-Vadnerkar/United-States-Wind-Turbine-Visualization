@@ -4,35 +4,64 @@ body, html {
     font-family: Arial, sans-serif;
 }
 
-header {
-    background-color: #333;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-}
 
 main {
     padding: 20px;
 }
 
+#visualization {
+    display: grid;
+    grid-template-columns: 66% 33%;
+    grid-template-rows: 100% 100%;
+
+}
+
 .svg-container {
     width: 100%;
-    max-width: 600px;
-    margin: auto;
+    height: 100%;
+
+    /*max-width: 500px;*/
+    /*height: 500px;*/
+    /*margin: auto;*/
+    padding: 3px;
+
+
+}
+
+.svg-container-map {
+    width: 100%;
+    height: 100%;
+
+    /*max-width: 800px;*/
+    /*height: 500px;*/
+    /*margin: auto;*/
+    padding: 3px;
+
 }
 
 svg {
     width: 100%;
-    height: 400px; 
+    height: 100%;
     border: 1px solid #ccc;
+    box-sizing: border-box;
 }
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+
+}
+
 
 footer {
     background-color: #333;
     color: white;
     text-align: center;
-    padding: 10px 20px;
-    position: relative;
+    padding: 10px 0;
+    position: fixed;
     bottom: 0;
     width: 100%;
 }
