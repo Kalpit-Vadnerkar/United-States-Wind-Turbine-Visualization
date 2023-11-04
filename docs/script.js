@@ -51,7 +51,7 @@ const stateNameMapping = {
     "WY": "Wyoming"
 }
 
-function generateVisualization1() {
+function generateVisualization1(turbineData, mapData) {
     let element = document.getElementById("viz1");
 
     const width = element.clientWidth;
@@ -188,8 +188,7 @@ function generateVisualization1() {
             .attr("stroke", "lightgray")
             .attr("stroke-width", 1)
             .attr("fill", d => {
-                if (countByState[d.properties.NAME] != null)
-                    return colorScale(countByState[d.properties.NAME]);
+                if (countByState[d.properties.NAME] != null) return colorScale(countByState[d.properties.NAME]);
                 return "darkgray"
             })
             .attr("d", d => pathGenerator(d))
@@ -211,55 +210,50 @@ function generateVisualization1() {
 
     var svg = d3.select("#viz1").attr("width", width).attr("height", height);
 
-    d3.csv("uswtdb_v6_0_20230531.csv").then(turbineData => {
-            d3.json("gz_2010_us_040_00_500k.json").then(mapData => {
 
-                // Create the projection
-                let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
+    // Create the projection
+    let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
 
-                // If the point is not within the frame of the projection, filter it out
-                // This usually happens when the point is outside the US (in territories)
-                turbineData = turbineData.filter(d => {
-                    let coords = projection([d.xlong, d.ylat]);
-                    return coords != null;
-                });
+    // If the point is not within the frame of the projection, filter it out
+    // This usually happens when the point is outside the US (in territories)
+    turbineData = turbineData.filter(d => {
+        let coords = projection([d.xlong, d.ylat]);
+        return coords != null;
+    });
 
-                // Count how many turbines in each state
-                countByState = {}
-                for (const turbineDatum of turbineData) {
+    // Count how many turbines in each state
+    countByState = {}
+    for (const turbineDatum of turbineData) {
 
-                    let amount = Number(turbineDatum.p_tnum);
-                    if (turbineDatum.t_state in countByState) {
-                        countByState[stateNameMapping[turbineDatum.t_state]] += amount;
+        let amount = Number(turbineDatum.p_tnum);
+        if (turbineDatum.t_state in countByState) {
+            countByState[stateNameMapping[turbineDatum.t_state]] += amount;
 
-                    } else {
-                        countByState[stateNameMapping[turbineDatum.t_state]] = amount;
-
-                    }
-                }
-                let maxCount = -9999;
-                let minCount = 9999;
-
-                for (const state of Object.keys(countByState)) {
-                    maxCount = Math.max(countByState[state], maxCount);
-                    minCount = Math.min(countByState[state], minCount);
-
-                }
-                let range = [minCount, maxCount];
-
-                // Draw data
-                drawMapAndTurbines(svg, mapData, turbineData, projection, range);
-                drawLegend(svg, range);
-
-            })
+        } else {
+            countByState[stateNameMapping[turbineDatum.t_state]] = amount;
 
         }
-    )
+    }
+    let maxCount = -9999;
+    let minCount = 9999;
+
+    for (const state of Object.keys(countByState)) {
+        maxCount = Math.max(countByState[state], maxCount);
+        minCount = Math.min(countByState[state], minCount);
+
+    }
+    let range = [minCount, maxCount];
+
+    // Draw data
+    drawMapAndTurbines(svg, mapData, turbineData, projection, range);
+    drawLegend(svg, range);
 
 
 }
 
-function generateVisualization2() {
+function generateVisualization2(turbineData, mapData) {
+
+
 
 }
 
@@ -274,7 +268,17 @@ function generateVisualization4() {
 // document.addEventListener('DOMContentLoaded', function () {
 //
 // });
-generateVisualization1();
-generateVisualization2();
-generateVisualization3();
-generateVisualization4();
+
+async function main() {
+    // Load data
+    var turbineData = await d3.csv("uswtdb_v6_0_20230531.csv");
+    var mapData = await d3.json("gz_2010_us_040_00_500k.json");
+
+    generateVisualization1(turbineData, mapData);
+    generateVisualization2(turbineData, mapData);
+    generateVisualization3();
+    generateVisualization4();
+}
+
+
+main();
