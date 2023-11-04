@@ -218,6 +218,7 @@ function generateVisualization1() {
                 let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
 
                 // If the point is not within the frame of the projection, filter it out
+                // This usually happens when the point is outside the US (in territories)
                 turbineData = turbineData.filter(d => {
                     let coords = projection([d.xlong, d.ylat]);
                     return coords != null;
