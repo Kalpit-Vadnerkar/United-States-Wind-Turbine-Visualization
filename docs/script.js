@@ -95,13 +95,9 @@ function generateVisualization1() {
                     .attr("stroke", "gray")
                     .attr("fill", "lightblue");
 
-
-                // let graticule = svg.append("path")
-                //     .attr("d", pathGenerator(d3.geoGraticule10()))
-                //     .attr("stroke", "gray")
-                //     .attr("fill", "none");
-                // let colorScale = d3.scaleOrdinal().domain(keys).range(["#fbb4ae", "#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#ffffcc", "#e5d8bd", "#fddaec", "#f2f2f2"]);
-                let colorScale = d3.scaleLinear().domain([minCount, maxCount]).range(["#f3bdb8", "#5bb1ff"]);
+                let range = [minCount, maxCount];
+                let colors = ["#26440e", "#66ff5b"];
+                let colorScale = d3.scaleLinear().domain(range).range(colors);
 
                 let state = svg.append("g")
                     .selectAll(".state")
@@ -110,6 +106,7 @@ function generateVisualization1() {
                     .append("path")
                     .attr("class", "state")
                     .attr("stroke", "lightgray")
+                    .attr("stroke-width", 1)
                     .attr("fill", d => {
                         if (countByState[d.properties.NAME] != null)
                             return colorScale(countByState[d.properties.NAME]);
@@ -122,13 +119,98 @@ function generateVisualization1() {
                     .data(turbineData)
                     .enter()
                     .append("circle")
-                    .attr("r", 2)
-                    .attr("fill", "green")
+                    .attr("r", 3)
+                    .attr("fill", "#63b7b7")
+                    .attr("stroke", "#153b3b")
+                    .attr("stroke-width", 1)
                     .attr("transform", d => {
-                        return "translate(" + projection([d.xlong, d.ylat]) + ")";
+                        if (d != null)
+                            return "translate(" + projection([d.xlong, d.ylat]) + ")";
                     });
 
 
+                var gradient = svg.append("svg:defs")
+                    .append("svg:linearGradient")
+                    .attr("id", "gradient")
+                    .attr("x1", "0%")
+                    .attr("y1", "0%")
+                    .attr("x2", "100%")
+                    .attr("y2", "100%")
+                    .attr("spreadMethod", "pad")
+                    .attr("gradientTransform", "rotate(45)");
+                gradient.append("svg:stop")
+                    .attr("offset", "0%")
+                    .attr("stop-color", colors[0])
+                    .attr("stop-opacity", 1);
+
+                gradient.append("svg:stop")
+                    .attr("offset", "100%")
+                    .attr("stop-color", colors[1])
+                    .attr("stop-opacity", 1);
+
+
+                const legend = svg
+                    .append("g")
+                    .attr("class", "legend")
+                legend.append("rect")
+                    .attr("fill", "rgba(155,155,155,0.8)")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", 120)
+                    .attr("height", 180)
+                    .attr("stroke", "lightgray")
+                    .attr("stroke-width", 1);
+
+                const gradientLegend = legend
+                    .append("g")
+                    .selectAll("rect")
+                    .data([1])
+                    .enter()
+                    .append("rect")
+                    .attr("fill", "url(#gradient)")
+                    .attr("x", 40)
+                    .attr("y", 30)
+                    .attr("width", 30)
+                    .attr("height", 120)
+                    .attr("stroke", "lightgray")
+                    .attr("stroke-width", 1);
+
+                const gradientLabel = legend.append("text").text("Number of Turbine Projects").attr("x", 0).attr("y", 20);
+                const gradientLabels = legend
+                    .append("g")
+                    .selectAll("text")
+                    .data(range)
+                    .enter()
+                    .append("text")
+                    .attr("fill", d => {
+                        return "black";
+                    })
+                    .attr("x", 33 + 40)
+                    .attr("y", d => {
+                        return range.indexOf(d) * 100 + 50
+                    })
+                    .text(d => {
+                        return d;
+                    });
+
+                const pointLegend = legend
+                    .append("g")
+                    .selectAll("circle")
+                    .data(range)
+                    .enter()
+                    .append("text")
+                    .attr("fill", d => {
+                        return "black";
+                    })
+                    .attr("x", 33 + 40)
+                    .attr("y", d => {
+                        return range.indexOf(d) * 100 + 50
+                    })
+                    .text(d => {
+                        return d;
+                    });
+
+                legend.attr("transform", "translate(" + width * 0.7 + "," + ((height/2) - 90)  + ")");
             })
 
         }
