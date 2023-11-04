@@ -124,9 +124,7 @@ function generateVisualization1() {
             .append("tspan")
             .attr("x", 15)
             .attr("dy", 15)
-            .text(d => {
-                return d;
-            });
+            .text(d => d);
 
 
         const gradientLabels = legend
@@ -135,16 +133,11 @@ function generateVisualization1() {
             .data(range)
             .enter()
             .append("text")
-            .attr("fill", d => {
-                return "black";
-            })
             .attr("x", 33 + 40)
             .attr("y", d => {
                 return range.indexOf(d) * 100 + 50
             })
-            .text(d => {
-                return d;
-            });
+            .text(d => d);
 
         // Point key
         const pointLegend = legend
@@ -157,10 +150,7 @@ function generateVisualization1() {
             .attr("fill", "#63b7b7")
             .attr("stroke", "#153b3b")
             .attr("stroke-width", 1)
-            .attr("transform", d => {
-                if (d != null)
-                    return "translate(58, 165)";
-            });
+            .attr("transform", "translate(58, 165)");
 
         const pointLabel = legend
             .append("text")
@@ -171,9 +161,7 @@ function generateVisualization1() {
             .append("tspan")
             .attr("x", 15)
             .attr("dy", 15)
-            .text(d => {
-                return d;
-            });
+            .text(d => d);
 
         legend.attr("transform", "translate(" + width * 0.7 + "," + ((height / 2) - 90) + ")");
     }
