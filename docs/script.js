@@ -234,14 +234,9 @@ function generateVisualization1(turbineData, mapData) {
 
         }
     }
-    let maxCount = -9999;
-    let minCount = 9999;
+    let maxCount = Math.max(...Object.values(countByState));
+    let minCount = Math.min(...Object.values(countByState));
 
-    for (const state of Object.keys(countByState)) {
-        maxCount = Math.max(countByState[state], maxCount);
-        minCount = Math.min(countByState[state], minCount);
-
-    }
     let range = [minCount, maxCount];
 
     // Draw data
@@ -252,9 +247,57 @@ function generateVisualization1(turbineData, mapData) {
 }
 
 function generateVisualization2(turbineData, mapData) {
+    let element = document.getElementById("viz2");
+
+    const width = element.clientWidth;
+    const height = element.clientHeight;
 
 
+    var svg = d3.select("#viz2").attr("width", width).attr("height", height);
 
+    let countByYear = {}
+    for (const turbineDatum of turbineData) {
+        let year = Number(turbineDatum.p_year);
+        if (year == 0) continue; // Year is zero, ignore it
+        if (year in countByYear) {
+            countByYear[year] += 1;
+        } else {
+            countByYear[year] = 1;
+        }
+    }
+    let xMin = Math.min(...Object.keys(countByYear));
+    let xMax = Math.max(...Object.keys(countByYear));
+    xRange = [xMin, xMax];
+
+    let yMin = Math.min(...Object.values(countByYear));
+    let yMax = Math.max(...Object.values(countByYear));
+    yRange = [yMin, yMax];
+
+    var x = d3.scaleLinear()
+        .domain(xRange)
+        .range([0, width]);
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+        .domain(yRange)
+        .range([height, 0]);
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Add the line
+    console.log(Object.entries(countByYear))
+    svg.append("path")
+        .data([Object.entries(countByYear)])
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+            .x(d => x(d[0]))
+            .y(d => y(d[1]))
+        );
 }
 
 function generateVisualization3() {
@@ -274,7 +317,7 @@ async function main() {
     var turbineData = await d3.csv("uswtdb_v6_0_20230531.csv");
     var mapData = await d3.json("gz_2010_us_040_00_500k.json");
 
-    generateVisualization1(turbineData, mapData);
+    // generateVisualization1(turbineData, mapData);
     generateVisualization2(turbineData, mapData);
     generateVisualization3();
     generateVisualization4();
