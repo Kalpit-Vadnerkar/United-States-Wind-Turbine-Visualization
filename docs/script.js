@@ -246,12 +246,18 @@ function generateVisualization1(turbineData, mapData) {
 
 }
 
-function generateVisualization2(turbineData, mapData) {
+function generateVisualization2(turbineData) {
+
+
     let element = document.getElementById("viz2");
 
     const width = element.clientWidth;
     const height = element.clientHeight;
-
+    let dimensions = {
+        width: width, height: height, margin: {
+            top: 10, bottom: 30, right: 10, left: 30
+        }
+    };
 
     var svg = d3.select("#viz2").attr("width", width).attr("height", height);
 
@@ -265,6 +271,7 @@ function generateVisualization2(turbineData, mapData) {
             countByYear[year] = 1;
         }
     }
+
     let xMin = Math.min(...Object.keys(countByYear));
     let xMax = Math.max(...Object.keys(countByYear));
     xRange = [xMin, xMax];
@@ -273,31 +280,37 @@ function generateVisualization2(turbineData, mapData) {
     let yMax = Math.max(...Object.values(countByYear));
     yRange = [yMin, yMax];
 
+    // Add X axis
     var x = d3.scaleLinear()
         .domain(xRange)
-        .range([0, width]);
+        .range([dimensions.margin.left, dimensions.width - dimensions.margin.right]);
     svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", "translate(0," + (height - dimensions.margin.bottom) + ")")
         .call(d3.axisBottom(x));
 
     // Add Y axis
     var y = d3.scaleLinear()
         .domain(yRange)
-        .range([height, 0]);
+        .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
     svg.append("g")
+        .attr("transform", "translate(" + dimensions.margin.left + ",0)")
         .call(d3.axisLeft(y));
 
     // Add the line
-    console.log(Object.entries(countByYear))
     svg.append("path")
         .data([Object.entries(countByYear)])
         .attr("fill", "none")
         .attr("stroke", "steelblue")
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
-            .x(d => x(d[0]))
-            .y(d => y(d[1]))
-        );
+            .x(d => x(d[0]) + dimensions.margin.left)
+            .y(d => y(d[1])));
+
+    svg.append("g")
+        .attr("transform", `translate(${(dimensions.width / 2) - dimensions.margin.left - 20},  ${dimensions.margin.top+10})`)
+        .append("text")
+        .data(["Number of new turbine projects per year"])
+        .text(d => d);
 }
 
 function generateVisualization3() {
@@ -317,8 +330,8 @@ async function main() {
     var turbineData = await d3.csv("uswtdb_v6_0_20230531.csv");
     var mapData = await d3.json("gz_2010_us_040_00_500k.json");
 
-    // generateVisualization1(turbineData, mapData);
-    generateVisualization2(turbineData, mapData);
+    generateVisualization1(turbineData, mapData);
+    generateVisualization2(turbineData);
     generateVisualization3();
     generateVisualization4();
 }
