@@ -1,4 +1,5 @@
 import { generateVisualization3 } from './PieChart.js';
+import { drawHistogram } from './Histogram.js';
 
 
 const stateNameMapping = {
@@ -348,9 +349,14 @@ function generateVisualization2(turbineData) {
 
 }
 
-function generateVisualization4() {
-
+function generateVisualization4(turbineData) {
+    // Define margins, width, and height as required
+    const margin = {top: 10, right: 30, bottom: 30, left: 40};
+    const width = 460 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+    drawHistogram(turbineData, margin, width, height);
 }
+
 
 async function main() {
     // Load data
@@ -360,7 +366,7 @@ async function main() {
     generateVisualization1(turbineData, mapData);
     generateVisualization2(turbineData);
     generateVisualization3(turbineData);
-    generateVisualization4();
+    generateVisualization4(turbineData);
 }
 
 
