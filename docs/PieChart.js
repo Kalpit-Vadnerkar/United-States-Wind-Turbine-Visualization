@@ -85,33 +85,37 @@ function addPercentageLabels(svg, pie, arcGenerator, dataReady) {
        .style("font-size", "14px");
 }
 
-function createLegend(svg, colorScale, radius, dataReady) {
-    // Adjust the legend to use the color scale and dynamic positioning
-    const legendBoxSize = 20;
-    const legendSpacing = 4;
+function createLegend(svg, colorScale, radius, data_ready) {
+    const legendBoxSize = 20; // Size of the color box
+    const legendSpacing = 4; // Spacing between boxes
+    const legendHeight = legendBoxSize + legendSpacing; // Height of one legend item
 
-    const legend = svg.selectAll('.legend')
-        .data(colorScale.domain())
+    // Create group elements for each legend item
+    const legend = svg.selectAll('.legend') // selecting elements with class 'legend'
+        .data(colorScale.domain()) // use the unique categories as data
         .enter()
-        .append('g')
-        .attr('class', 'legend')
-        .attr('transform', (d, i) => {
-            const offset = legendBoxSize * colorScale.domain().length / 2;
-            const horz = 2 * radius;
-            const vert = i * (legendBoxSize + legendSpacing) - offset;
-            return `translate(${horz},${vert})`;
+        .append('g') // create a g element for each category
+        .attr('class', 'legend') // class for styling
+        .attr('transform', function(d, i) {
+            const height = legendHeight;
+            const offset = height * colorScale.domain().length / 2;
+            const horz = 2 * legendBoxSize; 
+            const vert = i * height - offset;
+            return `translate(${radius + horz},${vert})`;
         });
 
+    // Add the colored boxes to the legend
     legend.append('rect')
         .attr('width', legendBoxSize)
         .attr('height', legendBoxSize)
         .style('fill', colorScale)
         .style('stroke', colorScale);
 
+    // Add the category text to the legend
     legend.append('text')
         .attr('x', legendBoxSize + legendSpacing)
-        .attr('y', legendBoxSize / 2 + legendSpacing)
-        .attr("alignment-baseline","middle")
+        .attr('y', legendBoxSize - legendSpacing)
+        //.attr("alignment-baseline","middle")
         .text(d => d);
 }
 
