@@ -206,10 +206,17 @@ function generateVisualization1(turbineData, mapData) {
                 let coords = projection([d.xlong, d.ylat]);
                 return "translate(" + projection([d.xlong, d.ylat]) + ")";
             });
+
+        svg.append("text")
+            .attr("x", width / 3)
+            .attr("y", -6)
+            .attr("class", "legend-title")
+            .attr("font-size", "24px")
+            .text("Proliferation of Wind Turbines in the USA");
     }
 
     var svg = d3.select("#viz1").attr("width", width).attr("height", height);
-
+    var globalGroup = svg.append("g");
 
     // Create the projection
     let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
@@ -240,8 +247,10 @@ function generateVisualization1(turbineData, mapData) {
     let range = [minCount, maxCount];
 
     // Draw data
-    drawMapAndTurbines(svg, mapData, turbineData, projection, range);
-    drawLegend(svg, range);
+    drawMapAndTurbines(globalGroup, mapData, turbineData, projection, range);
+    drawLegend(globalGroup, range);
+
+    globalGroup.attr("transform", "translate(0, 30)");
 
 
 }
@@ -259,7 +268,7 @@ function generateVisualization2(turbineData) {
         }
     };
 
-    console.log(dimensions);
+
 
     var svg = d3.select("#viz2").attr("width", width).attr("height", height);
 
@@ -333,6 +342,7 @@ function generateVisualization2(turbineData) {
         .text("Amount");
 
     globalGroup.attr("transform", "translate(10," + dimensions.margin.top + ")");
+
 }
 
 function generateVisualization3() {
