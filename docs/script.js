@@ -255,12 +255,15 @@ function generateVisualization2(turbineData) {
     const height = element.clientHeight;
     let dimensions = {
         width: width, height: height, margin: {
-            top: 10, bottom: 30, right: 10, left: 30
+            top: 30, bottom: 30, right: 10, left: 50
         }
     };
 
+    console.log(dimensions);
+
     var svg = d3.select("#viz2").attr("width", width).attr("height", height);
 
+    var globalGroup = svg.append("g");
     let countByYear = {}
     for (const turbineDatum of turbineData) {
         let year = Number(turbineDatum.p_year);
@@ -284,7 +287,7 @@ function generateVisualization2(turbineData) {
     var x = d3.scaleLinear()
         .domain(xRange)
         .range([dimensions.margin.left, dimensions.width - dimensions.margin.right]);
-    svg.append("g")
+    globalGroup.append("g")
         .attr("transform", "translate(0," + (height - dimensions.margin.bottom) + ")")
         .call(d3.axisBottom(x));
 
@@ -292,12 +295,12 @@ function generateVisualization2(turbineData) {
     var y = d3.scaleLinear()
         .domain(yRange)
         .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
-    svg.append("g")
+    globalGroup.append("g")
         .attr("transform", "translate(" + dimensions.margin.left + ",0)")
         .call(d3.axisLeft(y));
 
     // Add the line
-    svg.append("path")
+    globalGroup.append("path")
         .data([Object.entries(countByYear)])
         .attr("fill", "none")
         .attr("stroke", "steelblue")
@@ -306,11 +309,30 @@ function generateVisualization2(turbineData) {
             .x(d => x(d[0]) + dimensions.margin.left)
             .y(d => y(d[1])));
 
-    svg.append("g")
-        .attr("transform", `translate(${(dimensions.width / 2) - dimensions.margin.left - 20},  ${dimensions.margin.top+10})`)
+    // Title
+    globalGroup.append("g")
+        .attr("transform", `translate(${(dimensions.width / 2) - dimensions.margin.left - 20},  ${dimensions.margin.top - 10})`)
         .append("text")
+        .attr("font-size", "24px")
         .data(["Number of new turbine projects per year"])
         .text(d => d);
+
+    globalGroup.append("text")
+        .attr("class", "x-label")
+        .attr("text-anchor", "end")
+        .attr("x", width / 2 + dimensions.margin.left)
+        .attr("y", height + 10)
+        .text("Year");
+
+    globalGroup.append("text")
+        .attr("class", "y-label")
+        .attr("text-anchor", "end")
+        .attr("x", -dimensions.height / 2 + dimensions.margin.top)
+        .attr("y", dimensions.margin.left - 40)
+        .attr("transform", "rotate(-90)")
+        .text("Amount");
+
+    globalGroup.attr("transform", "translate(10," + dimensions.margin.top + ")");
 }
 
 function generateVisualization3() {
