@@ -1,3 +1,6 @@
+import { generateVisualization3 } from './PieChart.js';
+
+
 const stateNameMapping = {
     "AL": "Alabama",
     "AK": "Alaska",
@@ -229,7 +232,7 @@ function generateVisualization1(turbineData, mapData) {
     });
 
     // Count how many turbines in each state
-    countByState = {}
+    let countByState = {}
     for (const turbineDatum of turbineData) {
 
         let amount = Number(turbineDatum.p_tnum);
@@ -286,11 +289,11 @@ function generateVisualization2(turbineData) {
 
     let xMin = Math.min(...Object.keys(countByYear));
     let xMax = Math.max(...Object.keys(countByYear));
-    xRange = [xMin, xMax];
+    let xRange = [xMin, xMax];
 
     let yMin = Math.min(...Object.values(countByYear));
     let yMax = Math.max(...Object.values(countByYear));
-    yRange = [yMin, yMax];
+    let yRange = [yMin, yMax];
 
     // Add X axis
     var x = d3.scaleLinear()
@@ -345,17 +348,9 @@ function generateVisualization2(turbineData) {
 
 }
 
-function generateVisualization3() {
-
-}
-
 function generateVisualization4() {
 
 }
-
-// document.addEventListener('DOMContentLoaded', function () {
-//
-// });
 
 async function main() {
     // Load data
@@ -364,7 +359,7 @@ async function main() {
 
     generateVisualization1(turbineData, mapData);
     generateVisualization2(turbineData);
-    generateVisualization3();
+    generateVisualization3(turbineData);
     generateVisualization4();
 }
 
