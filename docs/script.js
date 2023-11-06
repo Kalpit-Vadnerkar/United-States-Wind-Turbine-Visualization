@@ -241,14 +241,9 @@ function generateVisualization1(turbineData, mapData) {
 
         }
     }
-    let maxCount = -9999;
-    let minCount = 9999;
+    let maxCount = Math.max(...Object.values(countByState));
+    let minCount = Math.min(...Object.values(countByState));
 
-    for (const state of Object.keys(countByState)) {
-        maxCount = Math.max(countByState[state], maxCount);
-        minCount = Math.min(countByState[state], minCount);
-
-    }
     let range = [minCount, maxCount];
 
     // Draw data
@@ -260,8 +255,93 @@ function generateVisualization1(turbineData, mapData) {
 
 }
 
-function generateVisualization2(turbineData, mapData) {
+function generateVisualization2(turbineData) {
 
+
+    let element = document.getElementById("viz2");
+
+    const width = element.clientWidth;
+    const height = element.clientHeight;
+    let dimensions = {
+        width: width, height: height, margin: {
+            top: 30, bottom: 30, right: 10, left: 50
+        }
+    };
+
+
+
+    var svg = d3.select("#viz2").attr("width", width).attr("height", height);
+
+    var globalGroup = svg.append("g");
+    let countByYear = {}
+    for (const turbineDatum of turbineData) {
+        let year = Number(turbineDatum.p_year);
+        if (year == 0) continue; // Year is zero, ignore it
+        if (year in countByYear) {
+            countByYear[year] += 1;
+        } else {
+            countByYear[year] = 1;
+        }
+    }
+
+    let xMin = Math.min(...Object.keys(countByYear));
+    let xMax = Math.max(...Object.keys(countByYear));
+    xRange = [xMin, xMax];
+
+    let yMin = Math.min(...Object.values(countByYear));
+    let yMax = Math.max(...Object.values(countByYear));
+    yRange = [yMin, yMax];
+
+    // Add X axis
+    var x = d3.scaleLinear()
+        .domain(xRange)
+        .range([dimensions.margin.left, dimensions.width - dimensions.margin.right]);
+    globalGroup.append("g")
+        .attr("transform", "translate(0," + (height - dimensions.margin.bottom) + ")")
+        .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+        .domain(yRange)
+        .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
+    globalGroup.append("g")
+        .attr("transform", "translate(" + dimensions.margin.left + ",0)")
+        .call(d3.axisLeft(y));
+
+    // Add the line
+    globalGroup.append("path")
+        .data([Object.entries(countByYear)])
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+            .x(d => x(d[0]) + dimensions.margin.left)
+            .y(d => y(d[1])));
+
+    // Title
+    globalGroup.append("g")
+        .attr("transform", `translate(${(dimensions.width / 2) - dimensions.margin.left - 20},  ${dimensions.margin.top - 10})`)
+        .append("text")
+        .attr("font-size", "24px")
+        .data(["Number of new turbine projects per year"])
+        .text(d => d);
+
+    globalGroup.append("text")
+        .attr("class", "x-label")
+        .attr("text-anchor", "end")
+        .attr("x", width / 2 + dimensions.margin.left)
+        .attr("y", height + 10)
+        .text("Year");
+
+    globalGroup.append("text")
+        .attr("class", "y-label")
+        .attr("text-anchor", "end")
+        .attr("x", -dimensions.height / 2 + dimensions.margin.top)
+        .attr("y", dimensions.margin.left - 40)
+        .attr("transform", "rotate(-90)")
+        .text("Amount");
+
+    globalGroup.attr("transform", "translate(10," + dimensions.margin.top + ")");
 
 }
 
@@ -283,7 +363,7 @@ async function main() {
     var mapData = await d3.json("gz_2010_us_040_00_500k.json");
 
     generateVisualization1(turbineData, mapData);
-    generateVisualization2(turbineData, mapData);
+    generateVisualization2(turbineData);
     generateVisualization3();
     generateVisualization4();
 }
