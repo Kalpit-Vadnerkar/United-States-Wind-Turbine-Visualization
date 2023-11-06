@@ -353,10 +353,6 @@ function generateVisualization4() {
 
 }
 
-// document.addEventListener('DOMContentLoaded', function () {
-//
-// });
-
 async function main() {
     // Load data
     var turbineData = await d3.csv("uswtdb_v6_0_20230531.csv");
