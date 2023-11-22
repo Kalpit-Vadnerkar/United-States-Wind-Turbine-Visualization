@@ -1,6 +1,5 @@
-import { generateVisualization3 } from './PieChart.js';
-import { drawHistogram } from './Histogram.js';
-
+import {generateVisualization3} from './PieChart.js';
+import {drawHistogram} from './Histogram.js';
 
 const stateNameMapping = {
     "AL": "Alabama",
@@ -232,19 +231,20 @@ function generateVisualization1(turbineData, mapData) {
         return coords != null;
     });
 
+
     // Count how many turbines in each state
     let countByState = {}
     for (const turbineDatum of turbineData) {
 
         let amount = Number(turbineDatum.p_tnum);
-        if (turbineDatum.t_state in countByState) {
-            countByState[stateNameMapping[turbineDatum.t_state]] += amount;
+        if (stateNameMapping[turbineDatum.t_state] in countByState) {
+            countByState[stateNameMapping[turbineDatum.t_state]] += 1;
 
         } else {
-            countByState[stateNameMapping[turbineDatum.t_state]] = amount;
-
+            countByState[stateNameMapping[turbineDatum.t_state]] = 1;
         }
     }
+
     let maxCount = Math.max(...Object.values(countByState));
     let minCount = Math.min(...Object.values(countByState));
 
@@ -271,7 +271,6 @@ function generateVisualization2(turbineData) {
             top: 30, bottom: 30, right: 10, left: 50
         }
     };
-
 
 
     var svg = d3.select("#viz2").attr("width", width).attr("height", height);
