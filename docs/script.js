@@ -1,5 +1,5 @@
-import { generateVisualization3 } from './PieChart.js';
-import { drawHistogram } from './Histogram.js';
+import {generateVisualization3} from './PieChart.js';
+import {drawHistogram} from './Histogram.js';
 
 
 const stateNameMapping = {
@@ -219,7 +219,8 @@ function generateVisualization1(turbineData, mapData) {
             .text("Proliferation of Wind Turbines in the USA");
     }
 
-    var svg = d3.select("#viz1").attr("width", width).attr("height", height);
+    // var svg = d3.select("#viz1").attr("width", width).attr("height", height);
+    var svg = d3.select("#viz1");
     var globalGroup = svg.append("g");
 
     // Create the projection
@@ -271,7 +272,6 @@ function generateVisualization2(turbineData) {
             top: 30, bottom: 30, right: 10, left: 50
         }
     };
-
 
 
     var svg = d3.select("#viz2").attr("width", width).attr("height", height);

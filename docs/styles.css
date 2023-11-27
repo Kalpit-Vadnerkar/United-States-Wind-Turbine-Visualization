@@ -12,29 +12,15 @@ main {
 #visualization {
     display: grid;
     grid-template-columns: 66% 33%;
-    grid-template-rows: 100% 100%;
+    grid-template-rows: 50% 50%;
 
 }
 
-.svg-container {
+
+
+.svg-container, .svg-container-map {
     width: 100%;
     height: 100%;
-
-    /*max-width: 500px;*/
-    /*height: 500px;*/
-    /*margin: auto;*/
-    padding: 3px;
-
-
-}
-
-.svg-container-map {
-    width: 100%;
-    height: 100%;
-
-    /*max-width: 800px;*/
-    /*height: 500px;*/
-    /*margin: auto;*/
     padding: 3px;
 
 }

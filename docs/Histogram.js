@@ -40,7 +40,7 @@ function drawYAxis(chartGroup, yScale) {
 function drawTitle(svg, width, margin) {
     svg.append("text")
         .attr("x", (width / 2))
-        .attr("y", margin.top)
+        .attr("y", margin.top - 10)
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
         .style("text-decoration", "underline")

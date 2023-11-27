@@ -31,58 +31,58 @@ function getTopManufacturersData(filteredData) {
     if (othersCount > 0) {
         topFiveData.push(['Others', othersCount]);
     }
-    return topFiveData.map(([key, value]) => ({ key, value }));
+    return topFiveData.map(([key, value]) => ({key, value}));
 }
 
 function setupSvg() {
     const width = 450,
-          height = 450;
+        height = 450;
 
     return d3.select("#viz3")
-             .attr("width", width)
-             .attr("height", height)
-             .append("g")
-             .attr("transform", `translate(${width / 2}, ${height / 2})`);
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2}, ${height / 2})`);
 }
 
 function drawPieChart(svg, topManufacturersData, radius) {
     const pie = d3.pie()
-                  .sort(null)
-                  .value(d => d.value)(topManufacturersData);
+        .sort(null)
+        .value(d => d.value)(topManufacturersData);
     const arcGenerator = d3.arc().innerRadius(0).outerRadius(radius);
     const colorScale = getColorScale(topManufacturersData);
 
     svg.selectAll('path')
-       .data(pie)
-       .enter()
-       .append('path')
-       .attr('d', arcGenerator)
-       .attr('fill', d => colorScale(d.data.key))
-       .attr("stroke", "white")
-       .style("stroke-width", "2px")
-       .style("opacity", 0.7);
+        .data(pie)
+        .enter()
+        .append('path')
+        .attr('d', arcGenerator)
+        .attr('fill', d => colorScale(d.data.key))
+        .attr("stroke", "white")
+        .style("stroke-width", "2px")
+        .style("opacity", 0.7);
 
     addPercentageLabels(svg, pie, arcGenerator, topManufacturersData);
 }
 
 function getColorScale(dataReady) {
     return d3.scaleOrdinal()
-             .domain(dataReady.map(d => d.key))
-             .range(d3.schemeTableau10); // More colorblind-friendly color scheme
+        .domain(dataReady.map(d => d.key))
+        .range(d3.schemeTableau10); // More colorblind-friendly color scheme
 }
 
 function addPercentageLabels(svg, pie, arcGenerator, dataReady) {
     svg.selectAll('text')
-       .data(pie)
-       .enter()
-       .append('text')
-       .text(d => {
-           const percentage = (d.data.value / d3.sum(dataReady, d => d.value) * 100).toFixed(2);
-           return `${percentage}%`;
-       })
-       .attr("transform", d => `translate(${arcGenerator.centroid(d)})`)
-       .style("text-anchor", "middle")
-       .style("font-size", "14px");
+        .data(pie)
+        .enter()
+        .append('text')
+        .text(d => {
+            const percentage = (d.data.value / d3.sum(dataReady, d => d.value) * 100).toFixed(2);
+            return `${percentage}%`;
+        })
+        .attr("transform", d => `translate(${arcGenerator.centroid(d)})`)
+        .style("text-anchor", "middle")
+        .style("font-size", "14px");
 }
 
 function createLegend(svg, colorScale, radius, data_ready) {
@@ -96,10 +96,10 @@ function createLegend(svg, colorScale, radius, data_ready) {
         .enter()
         .append('g') // create a g element for each category
         .attr('class', 'legend') // class for styling
-        .attr('transform', function(d, i) {
+        .attr('transform', function (d, i) {
             const height = legendHeight;
             const offset = height * colorScale.domain().length / 2;
-            const horz = 2 * legendBoxSize; 
+            const horz = 2 * legendBoxSize;
             const vert = i * height - offset;
             return `translate(${radius + horz},${vert})`;
         });
@@ -121,12 +121,12 @@ function createLegend(svg, colorScale, radius, data_ready) {
 
 function addTitle(svg, state, radius) {
     svg.append("text")
-       .attr("x", 0)
-       .attr("y", -radius)
-       .attr("text-anchor", "middle")
-       .style("font-size", "16px")
-       .style("text-decoration", "underline")
-       .text(`Market Share by Manufacturer for ${state}`);
+        .attr("x", 0)
+        .attr("y", -radius - 10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text(`Market Share by Manufacturer for ${state}`);
 }
 
-export { generateVisualization3 };
+export {generateVisualization3};
