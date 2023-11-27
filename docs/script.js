@@ -1,5 +1,5 @@
-import {generateVisualization3} from './PieChart.js';
-import {drawHistogram} from './Histogram.js';
+import { generateVisualization3 } from './PieChart.js';
+import { drawHistogram } from './Histogram.js';
 
 
 const stateNameMapping = {
@@ -219,7 +219,7 @@ function generateVisualization1(turbineData, mapData) {
             .text("Proliferation of Wind Turbines in the USA");
     }
 
-    // var svg = d3.select("#viz1").attr("width", width).attr("height", height);
+// var svg = d3.select("#viz1").attr("width", width).attr("height", height);
     var svg = d3.select("#viz1");
     var globalGroup = svg.append("g");
 
@@ -238,14 +238,14 @@ function generateVisualization1(turbineData, mapData) {
     for (const turbineDatum of turbineData) {
 
         let amount = Number(turbineDatum.p_tnum);
-        if (turbineDatum.t_state in countByState) {
-            countByState[stateNameMapping[turbineDatum.t_state]] += amount;
+        if (stateNameMapping[turbineDatum.t_state] in countByState) {
+            countByState[stateNameMapping[turbineDatum.t_state]] += 1;
 
         } else {
-            countByState[stateNameMapping[turbineDatum.t_state]] = amount;
-
+            countByState[stateNameMapping[turbineDatum.t_state]] = 1;
         }
     }
+
     let maxCount = Math.max(...Object.values(countByState));
     let minCount = Math.min(...Object.values(countByState));
 
