@@ -167,7 +167,6 @@ function drawMap(turbineData, mapData) {
     const width = element.clientWidth;
     const height = element.clientHeight;
 
-    console.log(width, height);
 // var svg = d3.select("#viz1").attr("width", width).attr("height", height);
     var svg = d3.select("#viz1");
     var globalGroup = svg.append("g");
