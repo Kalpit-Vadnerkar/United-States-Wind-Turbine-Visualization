@@ -52,15 +52,15 @@ function drawLabels(svg, width, height, margin) {
     svg.append("text")
         .attr("text-anchor", "end")
         .attr("x", width / 2 + margin.left)
-        .attr("y", height + margin.top + 20)
+        .attr("y", height + margin.top + 30)
         .text("Turbine Capacity (kW)");
 
     // Y label
     svg.append("text")
         .attr("text-anchor", "end")
         .attr("transform", "rotate(-90)")
-        .attr("y", margin.left)
-        .attr("x", -margin.top)
+        .attr("y", margin.left - 30)
+        .attr("x", -margin.top - 70)
         .text("Number of Turbines");
 }
 
@@ -69,8 +69,10 @@ function drawHistogram(data, margin, width, height) {
     const svg = d3.select("#viz4")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
+    var globalGroup = svg.append("g");
 
-    const chartGroup = svg.append("g")
+
+    const chartGroup = globalGroup.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Create the bin generator
@@ -87,10 +89,11 @@ function drawHistogram(data, margin, width, height) {
     drawBars(chartGroup, bins, xScale, yScale, height);
     drawXAxis(chartGroup, xScale, height);
     drawYAxis(chartGroup, yScale);
-    drawTitle(svg, width, margin);
-    drawLabels(svg, width, height, margin);
+    drawTitle(globalGroup, width, margin);
+    drawLabels(globalGroup, width, height, margin);
+    globalGroup.attr("transform", "translate(10," + (margin.top + 10) + ")");
 }
 
 
 // Export the main function
-export { drawHistogram };
+export {drawHistogram};

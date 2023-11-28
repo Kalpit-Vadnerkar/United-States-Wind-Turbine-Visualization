@@ -5,7 +5,7 @@
  * @param {Object[]} turbineData - Array of turbine data objects.
  * @param {string} state - The state to filter the data by.
  */
-async function generateVisualization3(turbineData, state = 'IA') {
+function generateVisualization3(turbineData, state = 'IA') {
     const filteredData = filterDataByState(turbineData, state);
     const topManufacturersData = getTopManufacturersData(filteredData);
 

@@ -1,5 +1,5 @@
-import { generateVisualization3 } from './PieChart.js';
-import { drawHistogram } from './Histogram.js';
+import {generateVisualization3} from './PieChart.js';
+import {drawHistogram} from './Histogram.js';
 
 
 const stateNameMapping = {
@@ -268,13 +268,14 @@ function generateVisualization2(turbineData) {
     const width = element.clientWidth;
     const height = element.clientHeight;
     let dimensions = {
-        width: width, height: height, margin: {
+        width: width, height: 500,
+        margin: {
             top: 30, bottom: 30, right: 10, left: 50
         }
     };
 
 
-    var svg = d3.select("#viz2").attr("width", width).attr("height", height);
+    var svg = d3.select("#viz2");
 
     var globalGroup = svg.append("g");
     let countByYear = {}
@@ -301,7 +302,7 @@ function generateVisualization2(turbineData) {
         .domain(xRange)
         .range([dimensions.margin.left, dimensions.width - dimensions.margin.right]);
     globalGroup.append("g")
-        .attr("transform", "translate(0," + (height - dimensions.margin.bottom) + ")")
+        .attr("transform", "translate(0," + (dimensions.height - dimensions.margin.bottom) + ")")
         .call(d3.axisBottom(x));
 
     // Add Y axis
@@ -333,8 +334,8 @@ function generateVisualization2(turbineData) {
     globalGroup.append("text")
         .attr("class", "x-label")
         .attr("text-anchor", "end")
-        .attr("x", width / 2 + dimensions.margin.left)
-        .attr("y", height + 10)
+        .attr("x", dimensions.width / 2 + dimensions.margin.left)
+        .attr("y", dimensions.height + 10)
         .text("Year");
 
     globalGroup.append("text")
