@@ -1,24 +1,5 @@
 // PieChart.js
 
-/**
- * Generates a pie chart visualization for turbine data in a given state.
- * @param {Object[]} turbineData - Array of turbine data objects.
- * @param {string} state - The state to filter the data by.
- */
-function generateVisualization3(turbineData, state = 'IA') {
-    const filteredData = filterDataByState(turbineData, state);
-    const topManufacturersData = getTopManufacturersData(filteredData);
-
-    const svg = setupSvg();
-    const colorScale = getColorScale(topManufacturersData);
-
-    const radius = 180;
-
-    drawPieChart(svg, topManufacturersData, radius);
-    createLegend(svg, colorScale, radius, topManufacturersData);
-    addTitle(svg, state, radius);
-}
-
 function filterDataByState(turbineData, state) {
     return turbineData.filter(d => d.t_state === state);
 }
@@ -45,7 +26,7 @@ function setupSvg() {
         .attr("transform", `translate(${width / 2}, ${height / 2})`);
 }
 
-function drawPieChart(svg, topManufacturersData, radius) {
+function drawPie(svg, topManufacturersData, radius) {
     const pie = d3.pie()
         .sort(null)
         .value(d => d.value)(topManufacturersData);
@@ -119,14 +100,36 @@ function createLegend(svg, colorScale, radius, data_ready) {
         .text(d => d);
 }
 
-function addTitle(svg, state, radius) {
+function addTitle(svg, radius) {
     svg.append("text")
         .attr("x", 0)
         .attr("y", -radius - 10)
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
         .style("text-decoration", "underline")
-        .text(`Market Share by Manufacturer for ${state}`);
+        .text(`Market Share by Manufacturer`);
 }
 
-export {generateVisualization3};
+
+/**
+ * Generates a pie chart visualization for turbine data in a given state.
+ * @param {Object[]} turbineData - Array of turbine data objects.
+ */
+function drawPieChart(turbineData) {
+    // const filteredData = filterDataByState(turbineData, state);
+    // const topManufacturersData = getTopManufacturersData(filteredData);
+
+    const topManufacturersData = getTopManufacturersData(turbineData);
+
+    const svg = setupSvg();
+    const colorScale = getColorScale(topManufacturersData);
+
+    const radius = 180;
+
+    drawPie(svg, topManufacturersData, radius);
+    createLegend(svg, colorScale, radius, topManufacturersData);
+    addTitle(svg, radius);
+}
+
+
+export {drawPieChart};
