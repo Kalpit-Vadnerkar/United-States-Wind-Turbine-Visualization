@@ -61,12 +61,14 @@ const DIMENSIONS = {
 
 
 const DIMENSIONS_2 = {
-    width: 700, height: 500,
+    width: 600, height: 500,
     margin: {
         top: 30, bottom: 30, right: 50, left: 50
     }
 };
 
+const VIZ_TITLE_STYLE = "font-size: 20px; text-decoration: underline;";
 
-export {STATE_NAME_MAPPING, DIMENSIONS, DIMENSIONS_2};
+
+export {STATE_NAME_MAPPING, DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE};
 

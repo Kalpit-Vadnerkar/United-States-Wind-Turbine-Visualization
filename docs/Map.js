@@ -1,5 +1,5 @@
 // Map.js
-import {STATE_NAME_MAPPING, DIMENSIONS} from "./Constants.js";
+import {STATE_NAME_MAPPING, DIMENSIONS, VIZ_TITLE_STYLE} from "./Constants.js";
 
 const colors = ["#26440e", "#66ff5b"];
 
@@ -155,8 +155,8 @@ function drawMapAndTurbines(svg, mapData, turbineData, projection, range, countB
     svg.append("text")
         .attr("x", DIMENSIONS.width / 3)
         .attr("y", -6)
-        .attr("class", "legend-title")
-        .attr("font-size", "24px")
+        .attr("style", VIZ_TITLE_STYLE)
+        .attr("text-anchor", "middle")
         .text("Proliferation of Wind Turbines in the USA");
 }
 

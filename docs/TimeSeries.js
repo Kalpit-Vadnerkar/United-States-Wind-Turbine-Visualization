@@ -1,17 +1,7 @@
 // TimeSeries.js
+import {DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE} from "./Constants.js";
+
 function drawTimeSeries(turbineData) {
-
-    let element = document.getElementById("viz2");
-
-    const width = element.clientWidth;
-    const height = element.clientHeight;
-    let dimensions = {
-        width: width, height: 500,
-        margin: {
-            top: 30, bottom: 30, right: 10, left: 50
-        }
-    };
-
 
     var svg = d3.select("#viz2");
 
@@ -38,17 +28,17 @@ function drawTimeSeries(turbineData) {
 // Add X axis
     var x = d3.scaleLinear()
         .domain(xRange)
-        .range([dimensions.margin.left, dimensions.width - dimensions.margin.right]);
+        .range([DIMENSIONS_2.margin.left, DIMENSIONS_2.width - DIMENSIONS_2.margin.right]);
     globalGroup.append("g")
-        .attr("transform", "translate(0," + (dimensions.height - dimensions.margin.bottom) + ")")
+        .attr("transform", "translate(0," + (DIMENSIONS_2.height - DIMENSIONS_2.margin.bottom) + ")")
         .call(d3.axisBottom(x));
 
 // Add Y axis
     var y = d3.scaleLinear()
         .domain(yRange)
-        .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
+        .range([DIMENSIONS_2.height - DIMENSIONS_2.margin.bottom, DIMENSIONS_2.margin.top]);
     globalGroup.append("g")
-        .attr("transform", "translate(" + dimensions.margin.left + ",0)")
+        .attr("transform", "translate(" + DIMENSIONS_2.margin.left + ",0)")
         .call(d3.axisLeft(y));
 
 // Add the line
@@ -58,33 +48,33 @@ function drawTimeSeries(turbineData) {
         .attr("stroke", "steelblue")
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
-            .x(d => x(d[0]) + dimensions.margin.left)
+            .x(d => x(d[0]))
             .y(d => y(d[1])));
 
 // Title
-    globalGroup.append("g")
-        .attr("transform", `translate(${(dimensions.width / 2) - dimensions.margin.left - 20},  ${dimensions.margin.top - 10})`)
-        .append("text")
-        .attr("font-size", "24px")
-        .data(["Number of new turbine projects per year"])
-        .text(d => d);
+    globalGroup.append("text")
+        .attr("x", DIMENSIONS_2.width / 2)
+        .attr("y", -6)
+        .attr("style", VIZ_TITLE_STYLE)
+        .attr("text-anchor", "middle")
+        .text("Number of new turbine projects per year");
 
     globalGroup.append("text")
         .attr("class", "x-label")
         .attr("text-anchor", "end")
-        .attr("x", dimensions.width / 2 + dimensions.margin.left)
-        .attr("y", dimensions.height + 10)
+        .attr("x", DIMENSIONS_2.width / 2 + DIMENSIONS_2.margin.left)
+        .attr("y", DIMENSIONS_2.height + 10)
         .text("Year");
 
     globalGroup.append("text")
         .attr("class", "y-label")
         .attr("text-anchor", "end")
-        .attr("x", -dimensions.height / 2 + dimensions.margin.top)
-        .attr("y", dimensions.margin.left - 40)
+        .attr("x", -DIMENSIONS_2.height / 2 + DIMENSIONS_2.margin.top)
+        .attr("y", DIMENSIONS_2.margin.left - 40)
         .attr("transform", "rotate(-90)")
         .text("Amount");
 
-    globalGroup.attr("transform", "translate(10," + dimensions.margin.top + ")");
+    globalGroup.attr("transform", "translate(10," + DIMENSIONS_2.margin.top + ")");
 }
 
 export {drawTimeSeries};
