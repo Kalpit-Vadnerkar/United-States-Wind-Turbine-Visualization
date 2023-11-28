@@ -1,5 +1,5 @@
 import {PieChartVisualization} from './PieChart.js';
-import {drawHistogram} from './Histogram.js';
+import {HistogramVisualization} from './Histogram.js';
 import {TimeSeriesVisualization} from "./TimeSeries.js";
 import {TurbineMapVisualization} from "./Map.js";
 import {ALL_VALUE, EXCLUDED_STATES, STATE_NAME_MAPPING} from "./Constants.js";
@@ -8,6 +8,7 @@ import {ALL_VALUE, EXCLUDED_STATES, STATE_NAME_MAPPING} from "./Constants.js";
 var mapViz = null;
 var timeViz = null;
 var pieViz = null;
+var histViz = null;
 
 function stateSelector_onSelect(e) {
     if (mapViz == null || timeViz == null || pieViz == null) {
@@ -27,6 +28,9 @@ function stateSelector_onSelect(e) {
     pieViz.clear();
     pieViz.draw();
 
+    histViz.filterByState(stateSelector.value);
+    histViz.clear();
+    histViz.draw();
 }
 
 async function generateVisualization1(turbineData, mapData) {
@@ -46,7 +50,8 @@ async function generateVisualization3(turbineData) {
 }
 
 async function generateVisualization4(turbineData) {
-    drawHistogram(turbineData);
+    histViz = new HistogramVisualization(turbineData);
+    histViz.draw();
 }
 
 function populateStateSelector() {
