@@ -1,7 +1,7 @@
 // TimeSeries.js
 import {DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE} from "./Constants.js";
 
-function drawTimeSeries(turbineData) {
+async function drawTimeSeries(turbineData) {
 
     var svg = d3.select("#viz2");
 

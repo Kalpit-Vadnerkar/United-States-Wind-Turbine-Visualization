@@ -1,24 +1,39 @@
 import {drawPieChart} from './PieChart.js';
 import {drawHistogram} from './Histogram.js';
 import {drawTimeSeries} from "./TimeSeries.js";
-import {drawMap} from "./Map.js";
-import {STATE_NAME_MAPPING} from "./Constants.js";
+import {TurbineMapVisualization} from "./Map.js";
+import {STATE_NAME_MAPPING, ALL_VALUE} from "./Constants.js";
 
 
-function generateVisualization1(turbineData, mapData) {
-    drawMap(turbineData, mapData);
+var mapViz = null;
+
+function stateSelector_onSelect(e) {
+    if (mapViz == null) {
+        return false;
+    }
+    let stateSelector = document.getElementById("state-selector");
+
+    mapViz.filterByState(stateSelector.value);
+    mapViz.clear();
+    mapViz.draw();
 
 }
 
-function generateVisualization2(turbineData) {
+async function generateVisualization1(turbineData, mapData) {
+    mapViz = new TurbineMapVisualization(turbineData, mapData);
+    mapViz.draw();
+
+}
+
+async function generateVisualization2(turbineData) {
     drawTimeSeries(turbineData);
 }
 
-function generateVisualization3(turbineData) {
+async function generateVisualization3(turbineData) {
     drawPieChart(turbineData);
 }
 
-function generateVisualization4(turbineData) {
+async function generateVisualization4(turbineData) {
     drawHistogram(turbineData);
 }
 
@@ -26,8 +41,8 @@ function populateStateSelector() {
     let stateSelector = document.getElementById("state-selector");
     let allOption = document.createElement("option");
 
-    allOption.text = "---All---";
-    allOption.value = "ALL";
+    allOption.text = ALL_VALUE;
+    allOption.value = ALL_VALUE;
     allOption.selected = true;
     stateSelector.appendChild(allOption);
 
@@ -37,13 +52,17 @@ function populateStateSelector() {
         option.value = state;
         stateSelector.appendChild(option);
     }
+
+    stateSelector.addEventListener("change", stateSelector_onSelect);
+
+
 }
 
 function populateManufacturerSelector(turbineData) {
     let manufacturerSelector = document.getElementById("manufacturer-selector");
     let allOption = document.createElement("option");
-    allOption.text = "---All---";
-    allOption.value = "ALL";
+    allOption.text = ALL_VALUE;
+    allOption.value = ALL_VALUE;
     allOption.selected = true;
     manufacturerSelector.appendChild(allOption);
 
@@ -67,6 +86,7 @@ function populateManufacturerSelector(turbineData) {
     }
 }
 
+
 async function main() {
     // Load data
     console.log("Loading data");
@@ -83,6 +103,7 @@ async function main() {
     generateVisualization2(turbineData);
     generateVisualization3(turbineData);
     generateVisualization4(turbineData);
+    console.log("Done");
 }
 
 

@@ -52,6 +52,8 @@ const STATE_NAME_MAPPING = {
     "WY": "Wyoming"
 };
 
+const ALL_VALUE = "---ALL---";
+
 const DIMENSIONS = {
     width: 1200, height: 500,
     margin: {
@@ -70,5 +72,5 @@ const DIMENSIONS_2 = {
 const VIZ_TITLE_STYLE = "font-size: 20px; text-decoration: underline;";
 
 
-export {STATE_NAME_MAPPING, DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE};
+export {STATE_NAME_MAPPING, DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE, ALL_VALUE};
 

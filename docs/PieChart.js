@@ -115,7 +115,7 @@ function addTitle(svg, radius) {
  * Generates a pie chart visualization for turbine data in a given state.
  * @param {Object[]} turbineData - Array of turbine data objects.
  */
-function drawPieChart(turbineData) {
+async function drawPieChart(turbineData) {
     // const filteredData = filterDataByState(turbineData, state);
     // const topManufacturersData = getTopManufacturersData(filteredData);
 

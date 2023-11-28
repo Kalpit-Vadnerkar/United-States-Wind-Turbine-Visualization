@@ -24,7 +24,7 @@ function drawBars(chartGroup, bins, xScale, yScale, height) {
         .attr("x", d => xScale(d.x0)) // x0 is the lower bound of each bin
         .attr("y", d => yScale(d.length))
         .attr("width", d => Math.max(0, xScale(d.x1) - xScale(d.x0) - 1)) // x1 is the upper bound of each bin
-        .attr("height", d => height - yScale(d.length) - (DIMENSIONS_2.margin.bottom) );
+        .attr("height", d => height - yScale(d.length) - (DIMENSIONS_2.margin.bottom));
 }
 
 function drawXAxis(chartGroup, xScale) {
@@ -71,7 +71,7 @@ function drawLabels(svg, width, height, margin) {
 }
 
 
-function drawHistogram(turbineData) {
+async function drawHistogram(turbineData) {
 
 
     const svg = d3.select("#viz4")
@@ -81,7 +81,7 @@ function drawHistogram(turbineData) {
 
 
     const chartGroup = globalGroup.append("g")
-        // .attr("transform", `translate(${DIMENSIONS_2.margin.left},${DIMENSIONS_2.margin.top})`);
+    // .attr("transform", `translate(${DIMENSIONS_2.margin.left},${DIMENSIONS_2.margin.top})`);
 
     // Create the bin generator
     const xScale = createXScale(turbineData);
