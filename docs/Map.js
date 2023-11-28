@@ -1,5 +1,5 @@
 // Map.js
-import {STATE_NAME_MAPPING, DIMENSIONS, VIZ_TITLE_STYLE, ALL_VALUE} from "./Constants.js";
+import {ALL_VALUE, DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
 const colors = ["#26440e", "#66ff5b"];
@@ -196,7 +196,6 @@ class TurbineMapVisualization extends Visualization {
         let countByState = {}
         for (const turbineDatum of this.turbineData) {
 
-            let amount = Number(turbineDatum.p_tnum);
             if (STATE_NAME_MAPPING[turbineDatum.t_state] in countByState) {
                 countByState[STATE_NAME_MAPPING[turbineDatum.t_state]] += 1;
 
@@ -218,19 +217,6 @@ class TurbineMapVisualization extends Visualization {
     }
 
 
-    clear() {
-        d3.select(this.visElement).selectAll("*").remove();
-    }
-
-    filterByState(state) {
-        this.turbineData = this.originalTurbineData;
-
-        if (state !== ALL_VALUE) {
-            this.turbineData = this.turbineData.filter(d => {
-                return d.t_state === state;
-            });
-        }
-    }
 }
 
 export {TurbineMapVisualization};

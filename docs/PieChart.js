@@ -1,5 +1,7 @@
 // PieChart.js
 
+import {Visualization} from "./Visualization.js";
+
 function filterDataByState(turbineData, state) {
     return turbineData.filter(d => d.t_state === state);
 }
@@ -15,36 +17,6 @@ function getTopManufacturersData(filteredData) {
     return topFiveData.map(([key, value]) => ({key, value}));
 }
 
-function setupSvg() {
-    const width = 450,
-        height = 450;
-
-    return d3.select("#viz3")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", `translate(${width / 2}, ${height / 2})`);
-}
-
-function drawPie(svg, topManufacturersData, radius) {
-    const pie = d3.pie()
-        .sort(null)
-        .value(d => d.value)(topManufacturersData);
-    const arcGenerator = d3.arc().innerRadius(0).outerRadius(radius);
-    const colorScale = getColorScale(topManufacturersData);
-
-    svg.selectAll('path')
-        .data(pie)
-        .enter()
-        .append('path')
-        .attr('d', arcGenerator)
-        .attr('fill', d => colorScale(d.data.key))
-        .attr("stroke", "white")
-        .style("stroke-width", "2px")
-        .style("opacity", 0.7);
-
-    addPercentageLabels(svg, pie, arcGenerator, topManufacturersData);
-}
 
 function getColorScale(dataReady) {
     return d3.scaleOrdinal()
@@ -66,70 +38,102 @@ function addPercentageLabels(svg, pie, arcGenerator, dataReady) {
         .style("font-size", "14px");
 }
 
-function createLegend(svg, colorScale, radius, data_ready) {
-    const legendBoxSize = 20; // Size of the color box
-    const legendSpacing = 4; // Spacing between boxes
-    const legendHeight = legendBoxSize + legendSpacing; // Height of one legend item
 
-    // Create group elements for each legend item
-    const legend = svg.selectAll('.legend') // selecting elements with class 'legend'
-        .data(colorScale.domain()) // use the unique categories as data
-        .enter()
-        .append('g') // create a g element for each category
-        .attr('class', 'legend') // class for styling
-        .attr('transform', function (d, i) {
-            const height = legendHeight;
-            const offset = height * colorScale.domain().length / 2;
-            const horz = 2 * legendBoxSize;
-            const vert = i * height - offset;
-            return `translate(${radius + horz},${vert})`;
-        });
+class PieChartVisualization extends Visualization {
+    constructor(turbineData) {
+        super(turbineData);
+        this.visElement = "#viz3";
 
-    // Add the colored boxes to the legend
-    legend.append('rect')
-        .attr('width', legendBoxSize)
-        .attr('height', legendBoxSize)
-        .style('fill', colorScale)
-        .style('stroke', colorScale);
+    }
 
-    // Add the category text to the legend
-    legend.append('text')
-        .attr('x', legendBoxSize + legendSpacing)
-        .attr('y', legendBoxSize - legendSpacing)
-        //.attr("alignment-baseline","middle")
-        .text(d => d);
+    addTitle(svg, radius) {
+        svg.append("text")
+            .attr("x", 0)
+            .attr("y", -radius - 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
+            .text(`Market Share by Manufacturer`);
+    }
+
+    createLegend(svg, colorScale, radius) {
+        const legendBoxSize = 20; // Size of the color box
+        const legendSpacing = 4; // Spacing between boxes
+        const legendHeight = legendBoxSize + legendSpacing; // Height of one legend item
+
+        // Create group elements for each legend item
+        const legend = svg.selectAll('.legend') // selecting elements with class 'legend'
+            .data(colorScale.domain()) // use the unique categories as data
+            .enter()
+            .append('g') // create a g element for each category
+            .attr('class', 'legend') // class for styling
+            .attr('transform', function (d, i) {
+                const height = legendHeight;
+                const offset = height * colorScale.domain().length / 2;
+                const horz = 2 * legendBoxSize;
+                const vert = i * height - offset;
+                return `translate(${radius + horz},${vert})`;
+            });
+
+        // Add the colored boxes to the legend
+        legend.append('rect')
+            .attr('width', legendBoxSize)
+            .attr('height', legendBoxSize)
+            .style('fill', colorScale)
+            .style('stroke', colorScale);
+
+        // Add the category text to the legend
+        legend.append('text')
+            .attr('x', legendBoxSize + legendSpacing)
+            .attr('y', legendBoxSize - legendSpacing)
+            //.attr("alignment-baseline","middle")
+            .text(d => d);
+    }
+
+    drawPie(svg, topManufacturersData, radius) {
+        const pie = d3.pie()
+            .sort(null)
+            .value(d => d.value)(topManufacturersData);
+        const arcGenerator = d3.arc().innerRadius(0).outerRadius(radius);
+        const colorScale = getColorScale(topManufacturersData);
+
+        svg.selectAll('path')
+            .data(pie)
+            .enter()
+            .append('path')
+            .attr('d', arcGenerator)
+            .attr('fill', d => colorScale(d.data.key))
+            .attr("stroke", "white")
+            .style("stroke-width", "2px")
+            .style("opacity", 0.7);
+
+        addPercentageLabels(svg, pie, arcGenerator, topManufacturersData);
+    }
+
+    setupSvg() {
+        const width = 450,
+            height = 450;
+
+        return d3.select("#viz3")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+    }
+
+    draw() {
+        const topManufacturersData = getTopManufacturersData(this.turbineData);
+
+        const svg = this.setupSvg();
+        const colorScale = getColorScale(topManufacturersData);
+
+        const radius = 180;
+
+        this.drawPie(svg, topManufacturersData, radius);
+        this.createLegend(svg, colorScale, radius, topManufacturersData);
+        this.addTitle(svg, radius);
+    }
+
 }
 
-function addTitle(svg, radius) {
-    svg.append("text")
-        .attr("x", 0)
-        .attr("y", -radius - 10)
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
-        .text(`Market Share by Manufacturer`);
-}
-
-
-/**
- * Generates a pie chart visualization for turbine data in a given state.
- * @param {Object[]} turbineData - Array of turbine data objects.
- */
-async function drawPieChart(turbineData) {
-    // const filteredData = filterDataByState(turbineData, state);
-    // const topManufacturersData = getTopManufacturersData(filteredData);
-
-    const topManufacturersData = getTopManufacturersData(turbineData);
-
-    const svg = setupSvg();
-    const colorScale = getColorScale(topManufacturersData);
-
-    const radius = 180;
-
-    drawPie(svg, topManufacturersData, radius);
-    createLegend(svg, colorScale, radius, topManufacturersData);
-    addTitle(svg, radius);
-}
-
-
-export {drawPieChart};
+export {PieChartVisualization};

@@ -1,14 +1,16 @@
-import {drawPieChart} from './PieChart.js';
+import {PieChartVisualization} from './PieChart.js';
 import {drawHistogram} from './Histogram.js';
-import {drawTimeSeries} from "./TimeSeries.js";
+import {TimeSeriesVisualization} from "./TimeSeries.js";
 import {TurbineMapVisualization} from "./Map.js";
-import {STATE_NAME_MAPPING, ALL_VALUE} from "./Constants.js";
+import {ALL_VALUE, EXCLUDED_STATES, STATE_NAME_MAPPING} from "./Constants.js";
 
 
 var mapViz = null;
+var timeViz = null;
+var pieViz = null;
 
 function stateSelector_onSelect(e) {
-    if (mapViz == null) {
+    if (mapViz == null || timeViz == null || pieViz == null) {
         return false;
     }
     let stateSelector = document.getElementById("state-selector");
@@ -16,6 +18,14 @@ function stateSelector_onSelect(e) {
     mapViz.filterByState(stateSelector.value);
     mapViz.clear();
     mapViz.draw();
+
+    timeViz.filterByState(stateSelector.value);
+    timeViz.clear();
+    timeViz.draw();
+
+    pieViz.filterByState(stateSelector.value);
+    pieViz.clear();
+    pieViz.draw();
 
 }
 
@@ -26,11 +36,13 @@ async function generateVisualization1(turbineData, mapData) {
 }
 
 async function generateVisualization2(turbineData) {
-    drawTimeSeries(turbineData);
+    timeViz = new TimeSeriesVisualization(turbineData);
+    timeViz.draw();
 }
 
 async function generateVisualization3(turbineData) {
-    drawPieChart(turbineData);
+    pieViz = new PieChartVisualization(turbineData);
+    pieViz.draw();
 }
 
 async function generateVisualization4(turbineData) {
@@ -47,10 +59,12 @@ function populateStateSelector() {
     stateSelector.appendChild(allOption);
 
     for (const state of Object.keys(STATE_NAME_MAPPING)) {
-        let option = document.createElement("option");
-        option.text = STATE_NAME_MAPPING[state];
-        option.value = state;
-        stateSelector.appendChild(option);
+        if (!EXCLUDED_STATES.includes(state)) {
+            let option = document.createElement("option");
+            option.text = STATE_NAME_MAPPING[state];
+            option.value = state;
+            stateSelector.appendChild(option);
+        }
     }
 
     stateSelector.addEventListener("change", stateSelector_onSelect);

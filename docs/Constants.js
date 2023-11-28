@@ -51,6 +51,7 @@ const STATE_NAME_MAPPING = {
     "WI": "Wisconsin",
     "WY": "Wyoming"
 };
+const EXCLUDED_STATES = ["KY", "SC", "FL", "GA", "LA", "AL", "MS"];
 
 const ALL_VALUE = "---ALL---";
 
@@ -72,5 +73,5 @@ const DIMENSIONS_2 = {
 const VIZ_TITLE_STYLE = "font-size: 20px; text-decoration: underline;";
 
 
-export {STATE_NAME_MAPPING, DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE, ALL_VALUE};
+export {STATE_NAME_MAPPING, EXCLUDED_STATES, DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE, ALL_VALUE};
 

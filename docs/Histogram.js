@@ -50,7 +50,7 @@ function drawTitle(svg, width, margin) {
         .text("Turbine Capacity Distribution Histogram");
 }
 
-function drawLabels(svg, width, height, margin) {
+function drawLabels(svg) {
     // X label
     svg.append("text")
         .attr("class", "x-label")
@@ -66,7 +66,6 @@ function drawLabels(svg, width, height, margin) {
         .attr("x", -DIMENSIONS_2.height / 2 + DIMENSIONS_2.margin.top)
         .attr("y", DIMENSIONS_2.margin.left - 40)
         .attr("transform", "rotate(-90)")
-
         .text("Number of Turbines");
 }
 
