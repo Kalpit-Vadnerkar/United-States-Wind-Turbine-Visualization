@@ -13,7 +13,6 @@ class TurbineMapVisualization extends Visualization {
 
         this.mapData = mapData;
         this.visElement = "#viz1";
-        this.selectedState = "ALL";
     }
 
     drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
@@ -56,12 +55,13 @@ class TurbineMapVisualization extends Visualization {
                 return "translate(" + projection([d.xlong, d.ylat]) + ")";
             });
 
+        let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         svg.append("text")
             .attr("x", DIMENSIONS.width / 3)
             .attr("y", -6)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
-            .text("Proliferation of Wind Turbines in the USA");
+            .text(title);
     }
 
     drawLegend(svg, range) {

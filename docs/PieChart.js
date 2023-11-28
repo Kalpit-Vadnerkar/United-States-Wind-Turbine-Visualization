@@ -1,6 +1,7 @@
 // PieChart.js
 
 import {Visualization} from "./Visualization.js";
+import {ALL_VALUE, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 
 function filterDataByState(turbineData, state) {
     return turbineData.filter(d => d.t_state === state);
@@ -47,13 +48,15 @@ class PieChartVisualization extends Visualization {
     }
 
     addTitle(svg, radius) {
+
+        let title = `Market Share by Manufacturer in ${this.selectedState == ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
+
         svg.append("text")
             .attr("x", 0)
             .attr("y", -radius - 10)
             .attr("text-anchor", "middle")
-            .style("font-size", "16px")
-            .style("text-decoration", "underline")
-            .text(`Market Share by Manufacturer`);
+            .attr("style", VIZ_TITLE_STYLE)
+            .text(title);
     }
 
     createLegend(svg, colorScale, radius) {

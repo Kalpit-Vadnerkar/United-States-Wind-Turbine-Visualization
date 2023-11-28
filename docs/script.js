@@ -11,7 +11,7 @@ var pieViz = null;
 var histViz = null;
 
 function stateSelector_onSelect(e) {
-    if (mapViz == null || timeViz == null || pieViz == null) {
+    if (mapViz == null || timeViz == null || pieViz == null || histViz == null) {
         return false;
     }
     let stateSelector = document.getElementById("state-selector");
@@ -29,6 +29,30 @@ function stateSelector_onSelect(e) {
     pieViz.draw();
 
     histViz.filterByState(stateSelector.value);
+    histViz.clear();
+    histViz.draw();
+}
+
+
+function manufacturerSelector_onSelect(e) {
+    if (mapViz == null || timeViz == null || pieViz == null || histViz == null) {
+        return false;
+    }
+    let manufacturerSelector = document.getElementById("manufacturer-selector");
+
+    mapViz.filterByManufacturer(manufacturerSelector.value);
+    mapViz.clear();
+    mapViz.draw();
+
+    timeViz.filterByManufacturer(manufacturerSelector.value);
+    timeViz.clear();
+    timeViz.draw();
+
+    pieViz.filterByManufacturer(manufacturerSelector.value);
+    pieViz.clear();
+    pieViz.draw();
+
+    histViz.filterByManufacturer(manufacturerSelector.value);
     histViz.clear();
     histViz.draw();
 }
@@ -103,6 +127,8 @@ function populateManufacturerSelector(turbineData) {
         option.value = manufacturer;
         manufacturerSelector.appendChild(option);
     }
+    manufacturerSelector.addEventListener("change", manufacturerSelector_onSelect);
+
 }
 
 

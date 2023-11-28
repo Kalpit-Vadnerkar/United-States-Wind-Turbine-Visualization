@@ -1,5 +1,5 @@
 // TimeSeries.js
-import {DIMENSIONS_2, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, DIMENSIONS_2, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
 async function drawTimeSeries(turbineData) {
@@ -14,7 +14,6 @@ class TimeSeriesVisualization extends Visualization {
         this.originalTurbineData = turbineData;
 
         this.visElement = "#viz2";
-        this.selectedState = "ALL";
     }
 
     draw() {
@@ -68,12 +67,14 @@ class TimeSeriesVisualization extends Visualization {
                 .y(d => y(d[1])));
 
 // Title
+        let title = `Number of new ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbine Projects per year ${this.selectedState === ALL_VALUE ? "in the USA" : "in " + STATE_NAME_MAPPING[this.selectedState]}`;
+
         globalGroup.append("text")
             .attr("x", DIMENSIONS_2.width / 2)
             .attr("y", -6)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
-            .text("Number of new turbine projects per year");
+            .text(title);
 
         globalGroup.append("text")
             .attr("class", "x-label")

@@ -1,6 +1,6 @@
 // Histogram.js
 
-import {DIMENSIONS_2, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, DIMENSIONS_2, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
 class HistogramVisualization extends Visualization {
@@ -55,12 +55,13 @@ class HistogramVisualization extends Visualization {
 
 
     drawTitle(svg, width, margin) {
+        let title = `${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbine Capacity Distribution in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         svg.append("text")
             .attr("x", (width / 2))
             .attr("y", margin.top - 10)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
-            .text("Turbine Capacity Distribution Histogram");
+            .text(title);
     }
 
 
