@@ -26,6 +26,7 @@ class HistogramVisualization extends Visualization {
 
 
     drawBars(chartGroup, bins, xScale, yScale, height) {
+        let color = "#0d9d8c";
         chartGroup.selectAll(".bar")
             .data(bins)
             .enter()
@@ -34,7 +35,8 @@ class HistogramVisualization extends Visualization {
             .attr("x", d => xScale(d.x0)) // x0 is the lower bound of each bin
             .attr("y", d => yScale(d.length))
             .attr("width", d => Math.max(0, xScale(d.x1) - xScale(d.x0) - 1)) // x1 is the upper bound of each bin
-            .attr("height", d => height - yScale(d.length) - (SECOND_COL_DIMENSIONS.margin.bottom));
+            .attr("height", d => height - yScale(d.length) - (SECOND_COL_DIMENSIONS.margin.bottom))
+            .attr("fill", color);
     }
 
 

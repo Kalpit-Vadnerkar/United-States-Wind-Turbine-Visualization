@@ -3,8 +3,6 @@ import {ALL_VALUE, SECOND_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} f
 import {Visualization} from "./Visualization.js";
 
 
-
-
 class TimeSeriesVisualization extends Visualization {
     constructor(turbineData) {
         super(turbineData);
@@ -15,6 +13,7 @@ class TimeSeriesVisualization extends Visualization {
     }
 
     draw() {
+        let color = "#0d9d8c";
 
         var svg = d3.select(this.visElement);
 
@@ -44,7 +43,7 @@ class TimeSeriesVisualization extends Visualization {
             .range([SECOND_COL_DIMENSIONS.margin.left, SECOND_COL_DIMENSIONS.width - SECOND_COL_DIMENSIONS.margin.right]);
         globalGroup.append("g")
             .attr("transform", "translate(0," + (SECOND_COL_DIMENSIONS.height - SECOND_COL_DIMENSIONS.margin.bottom) + ")")
-            .call(d3.axisBottom(x));
+            .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
 // Add Y axis
         var y = d3.scaleLinear()
@@ -58,7 +57,7 @@ class TimeSeriesVisualization extends Visualization {
         globalGroup.append("path")
             .data([Object.entries(countByYear)])
             .attr("fill", "none")
-            .attr("stroke", "steelblue")
+            .attr("stroke", color)
             .attr("stroke-width", 1.5)
             .attr("d", d3.line()
                 .x(d => x(d[0]))
