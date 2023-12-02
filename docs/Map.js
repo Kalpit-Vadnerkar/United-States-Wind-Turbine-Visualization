@@ -1,8 +1,8 @@
 // Map.js
-import {ALL_VALUE, DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
-const colors = ["#26440e", "#66ff5b"];
+const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
 
 
 class TurbineMapVisualization extends Visualization {
@@ -24,8 +24,14 @@ class TurbineMapVisualization extends Visualization {
             .attr("stroke", "gray")
             .attr("fill", "lightblue");
 
+        let intervalRange = [];
+        let factor = (range[1] - range[0]) / (colors.length - 1);
 
-        let colorScale = d3.scaleLinear().domain(range).range(colors);
+        for (let i = 0; i < colors.length; i++) {
+            intervalRange.push(range[0] + factor * i);
+        }
+
+        let colorScale = d3.scaleLinear().domain(intervalRange).range(colors);
 
         let states = svg.append("g")
             .selectAll(".state")
@@ -47,8 +53,8 @@ class TurbineMapVisualization extends Visualization {
             .enter()
             .append("circle")
             .attr("r", 3)
-            .attr("fill", "#63b7b7")
-            .attr("stroke", "#153b3b")
+            .attr("fill", "#dca65a")
+            .attr("stroke", "#332301")
             .attr("stroke-width", 1)
             .attr('transform', d => {
                 let coords = projection([d.xlong, d.ylat]);
@@ -57,7 +63,7 @@ class TurbineMapVisualization extends Visualization {
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         svg.append("text")
-            .attr("x", DIMENSIONS.width / 3)
+            .attr("x", FIRST_COL_DIMENSIONS.width / 3)
             .attr("y", -6)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
@@ -69,21 +75,20 @@ class TurbineMapVisualization extends Visualization {
         var gradient = svg.append("svg:defs")
             .append("svg:linearGradient")
             .attr("id", "gradient")
-            .attr("x1", "0%")
-            .attr("y1", "0%")
-            .attr("x2", "100%")
-            .attr("y2", "100%")
-            .attr("spreadMethod", "pad")
-            .attr("gradientTransform", "rotate(45)");
-        gradient.append("svg:stop")
-            .attr("offset", "0%")
-            .attr("stop-color", colors[0])
-            .attr("stop-opacity", 1);
+            .attr("x1", "0")
+            .attr("y1", "0")
+            .attr("x2", "0")
+            .attr("y2", "1")
+            .attr("spreadMethod", "pad");
 
-        gradient.append("svg:stop")
-            .attr("offset", "100%")
-            .attr("stop-color", colors[1])
-            .attr("stop-opacity", 1);
+
+        for (let i = 0; i < colors.length; i++) {
+            let offset = (i / (colors.length - 1));
+            gradient.append("svg:stop")
+                .attr("offset", `${offset}`)
+                .attr("stop-color", colors[i])
+                .attr("stop-opacity", 1);
+        }
 
 
         // Start the legend
@@ -153,8 +158,8 @@ class TurbineMapVisualization extends Visualization {
             .enter()
             .append("circle")
             .attr("r", 3)
-            .attr("fill", "#63b7b7")
-            .attr("stroke", "#153b3b")
+            .attr("fill", "#dca65a")
+            .attr("stroke", "#332301")
             .attr("stroke-width", 1)
             .attr("transform", "translate(58, 165)");
 
@@ -162,23 +167,23 @@ class TurbineMapVisualization extends Visualization {
             .append("text")
             .attr("transform", "translate(63, 155)")
             .selectAll("tspan")
-            .data(["Location of", "Turbine Projects"])
+            .data(["Location of", "Turbines"])
             .enter()
             .append("tspan")
             .attr("x", 15)
             .attr("dy", 15)
             .text(d => d);
 
-        legend.attr("transform", "translate(" + DIMENSIONS.width * 0.7 + "," + ((DIMENSIONS.height / 2) - 90) + ")");
+        legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.75 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
     }
 
     draw() {
-        let element = document.getElementById("viz1");
+        // let element = document.getElementById("viz1");
+        //
+        // const width = element.clientWidth;
+        // const height = element.clientHeight;
+        const width = FIRST_COL_DIMENSIONS.width;
 
-        const width = element.clientWidth;
-        const height = element.clientHeight;
-
-// var svg = d3.select("#viz1").attr("width", width).attr("height", height);
         var svg = d3.select(this.visElement);
         var globalGroup = svg.append("g");
 
@@ -207,7 +212,15 @@ class TurbineMapVisualization extends Visualization {
         let maxCount = Math.max(...Object.values(countByState));
         let minCount = Math.min(...Object.values(countByState));
 
-        let range = [minCount, maxCount];
+        let maxNumDigits = Math.floor(Math.log10(maxCount));
+        let maxRoundedDown = maxCount / (10 ** maxNumDigits);
+        let maxRounded = (Math.floor(maxRoundedDown) + 1) * (10 ** maxNumDigits);
+
+        let minNumDigits = Math.floor(Math.log10(minCount));
+        let minRoundedDown = minCount / (10 ** minNumDigits);
+        let minRounded = (Math.floor(minRoundedDown)) * (10 ** minNumDigits);
+
+        let range = [minRounded, maxRounded];
 
         // Draw data
         this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);

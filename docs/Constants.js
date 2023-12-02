@@ -51,20 +51,20 @@ const STATE_NAME_MAPPING = {
     "WI": "Wisconsin",
     "WY": "Wyoming"
 };
-const EXCLUDED_STATES = ["KY", "SC", "FL", "GA", "LA", "AL", "MS"];
+const EXCLUDED_STATES = ["KY", "SC", "FL", "GA", "LA", "AL", "MS"]; // No data for these states
 
 const ALL_VALUE = "---ALL---";
 
-const DIMENSIONS = {
-    width: 1200, height: 500,
+const FIRST_COL_DIMENSIONS = {
+    width: 1200, height: 370,
     margin: {
         top: 30, bottom: 30, right: 50, left: 50
     }
 };
 
 
-const DIMENSIONS_2 = {
-    width: 600, height: 500,
+const SECOND_COL_DIMENSIONS = {
+    width: 600, height: 370,
     margin: {
         top: 30, bottom: 30, right: 50, left: 50
     }
@@ -73,5 +73,5 @@ const DIMENSIONS_2 = {
 const VIZ_TITLE_STYLE = "font-size: 20px; text-decoration: underline;";
 
 
-export {STATE_NAME_MAPPING, EXCLUDED_STATES, DIMENSIONS, DIMENSIONS_2, VIZ_TITLE_STYLE, ALL_VALUE};
+export {STATE_NAME_MAPPING, EXCLUDED_STATES, FIRST_COL_DIMENSIONS, SECOND_COL_DIMENSIONS, VIZ_TITLE_STYLE, ALL_VALUE};
 

@@ -1,6 +1,6 @@
 // Histogram.js
 
-import {ALL_VALUE, DIMENSIONS_2, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, SECOND_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
 class HistogramVisualization extends Visualization {
@@ -13,7 +13,7 @@ class HistogramVisualization extends Visualization {
     createXScale(data) {
         return d3.scaleLinear()
             .domain(d3.extent(data, d => +d.t_cap)) // Use the extent of turbine capacities
-            .range([DIMENSIONS_2.margin.left, DIMENSIONS_2.width - DIMENSIONS_2.margin.right]);
+            .range([SECOND_COL_DIMENSIONS.margin.left, SECOND_COL_DIMENSIONS.width - SECOND_COL_DIMENSIONS.margin.right]);
     }
 
 
@@ -21,7 +21,7 @@ class HistogramVisualization extends Visualization {
         // Set the y-scale to the count of entries in each bin
         return d3.scaleLinear()
             .domain([0, d3.max(bins, d => d.length)])
-            .range([DIMENSIONS_2.height - DIMENSIONS_2.margin.top, DIMENSIONS_2.margin.bottom]);
+            .range([SECOND_COL_DIMENSIONS.height - SECOND_COL_DIMENSIONS.margin.top, SECOND_COL_DIMENSIONS.margin.bottom]);
     }
 
 
@@ -34,14 +34,14 @@ class HistogramVisualization extends Visualization {
             .attr("x", d => xScale(d.x0)) // x0 is the lower bound of each bin
             .attr("y", d => yScale(d.length))
             .attr("width", d => Math.max(0, xScale(d.x1) - xScale(d.x0) - 1)) // x1 is the upper bound of each bin
-            .attr("height", d => height - yScale(d.length) - (DIMENSIONS_2.margin.bottom));
+            .attr("height", d => height - yScale(d.length) - (SECOND_COL_DIMENSIONS.margin.bottom));
     }
 
 
     drawXAxis(chartGroup, xScale) {
         chartGroup.append("g")
             .attr("class", "x-axis")
-            .attr("transform", "translate(0," + (DIMENSIONS_2.height - DIMENSIONS_2.margin.bottom) + ")")
+            .attr("transform", "translate(0," + (SECOND_COL_DIMENSIONS.height - SECOND_COL_DIMENSIONS.margin.bottom) + ")")
             .call(d3.axisBottom(xScale));
     }
 
@@ -49,7 +49,7 @@ class HistogramVisualization extends Visualization {
     drawYAxis(chartGroup, yScale) {
         chartGroup.append("g")
             .attr("class", "y-axis")
-            .attr("transform", "translate(" + DIMENSIONS_2.margin.left + ",0)")
+            .attr("transform", "translate(" + SECOND_COL_DIMENSIONS.margin.left + ",0)")
             .call(d3.axisLeft(yScale));
     }
 
@@ -70,16 +70,16 @@ class HistogramVisualization extends Visualization {
         svg.append("text")
             .attr("class", "x-label")
             .attr("text-anchor", "end")
-            .attr("x", DIMENSIONS_2.width / 2 + DIMENSIONS_2.margin.left)
-            .attr("y", DIMENSIONS_2.height + 10)
+            .attr("x", SECOND_COL_DIMENSIONS.width / 2 + SECOND_COL_DIMENSIONS.margin.left)
+            .attr("y", SECOND_COL_DIMENSIONS.height + 10)
             .text("Turbine Capacity (kW)");
 
         // Y label
         svg.append("text")
             .attr("class", "y-label")
             .attr("text-anchor", "end")
-            .attr("x", -DIMENSIONS_2.height / 2 + DIMENSIONS_2.margin.top)
-            .attr("y", DIMENSIONS_2.margin.left - 40)
+            .attr("x", -SECOND_COL_DIMENSIONS.height / 2 + SECOND_COL_DIMENSIONS.margin.top)
+            .attr("y", SECOND_COL_DIMENSIONS.margin.left - 40)
             .attr("transform", "rotate(-90)")
             .text("Number of Turbines");
     }
@@ -88,8 +88,8 @@ class HistogramVisualization extends Visualization {
     draw() {
 
         const svg = d3.select(this.visElement)
-            .attr("width", DIMENSIONS_2.width + DIMENSIONS_2.margin.left + DIMENSIONS_2.margin.right)
-            .attr("height", DIMENSIONS_2.height + DIMENSIONS_2.margin.top + DIMENSIONS_2.margin.bottom);
+            .attr("width", SECOND_COL_DIMENSIONS.width + SECOND_COL_DIMENSIONS.margin.left + SECOND_COL_DIMENSIONS.margin.right)
+            .attr("height", SECOND_COL_DIMENSIONS.height + SECOND_COL_DIMENSIONS.margin.top + SECOND_COL_DIMENSIONS.margin.bottom);
         var globalGroup = svg.append("g");
 
 
@@ -106,15 +106,15 @@ class HistogramVisualization extends Visualization {
 
         const yScale = this.createYScale(bins);
 
-        this.drawBars(chartGroup, bins, xScale, yScale, DIMENSIONS_2.height);
-        this.drawXAxis(chartGroup, xScale, DIMENSIONS_2.height);
+        this.drawBars(chartGroup, bins, xScale, yScale, SECOND_COL_DIMENSIONS.height);
+        this.drawXAxis(chartGroup, xScale, SECOND_COL_DIMENSIONS.height);
         this.drawYAxis(chartGroup, yScale);
-        this.drawTitle(globalGroup, DIMENSIONS_2.width, DIMENSIONS_2.margin);
-        this.drawLabels(globalGroup, DIMENSIONS_2.width, DIMENSIONS_2.height, DIMENSIONS_2.margin);
-        globalGroup.attr("transform", "translate(10," + DIMENSIONS_2.margin.top + ")");
+        this.drawTitle(globalGroup, SECOND_COL_DIMENSIONS.width, SECOND_COL_DIMENSIONS.margin);
+        this.drawLabels(globalGroup, SECOND_COL_DIMENSIONS.width, SECOND_COL_DIMENSIONS.height, SECOND_COL_DIMENSIONS.margin);
+        globalGroup.attr("transform", "translate(10," + SECOND_COL_DIMENSIONS.margin.top + ")");
     }
 
 }
 
-// Export the main 
+// Export the main
 export {HistogramVisualization};

@@ -6,13 +6,14 @@ body, html {
 
 
 main {
-    padding: 20px;
+    /*padding: 20px;*/
 }
 
 #visualization {
     display: grid;
     grid-template-columns: 66% 33%;
-    grid-template-rows: 50% 50%;
+    grid-template-rows: 370px 370px;
+    /*grid-template-rows: 50% 50%;*/
 
 }
 
@@ -34,7 +35,8 @@ svg {
 header {
     background-color: #333;
     color: white;
-    padding: 10px 0;
+    padding-top: 10px;
+    padding-bottom: 5px;
     text-align: center;
     width: 100%;
 
