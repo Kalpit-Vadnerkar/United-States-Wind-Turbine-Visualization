@@ -188,7 +188,8 @@ class TurbineMapVisualization extends Visualization {
         var globalGroup = svg.append("g");
 
         // Create the projection
-        let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
+        // let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
+        let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height * 0.9, {type: "Sphere"});
 
         // If the point is not within the frame of the projection, filter it out
         // This usually happens when the point is outside the US (in territories)

@@ -2,9 +2,7 @@
 import {ALL_VALUE, SECOND_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
-async function drawTimeSeries(turbineData) {
 
-}
 
 
 class TimeSeriesVisualization extends Visualization {

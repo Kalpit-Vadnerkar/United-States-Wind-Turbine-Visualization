@@ -43,7 +43,7 @@ function addPercentageLabels(svg, pie, arcGenerator, dataReady) {
 class PieChartVisualization extends Visualization {
     constructor(turbineData) {
         super(turbineData);
-        this.visElement = "#viz3";
+        this.visElement = "#viz4";
 
     }
 
@@ -90,7 +90,9 @@ class PieChartVisualization extends Visualization {
             .attr('x', legendBoxSize + legendSpacing)
             .attr('y', legendBoxSize - legendSpacing)
             //.attr("alignment-baseline","middle")
-            .text(d => d);
+            .text(d => {
+                return d !== "" ? d : "Unknown";
+            });
     }
 
     drawPie(svg, topManufacturersData, radius) {
@@ -117,7 +119,7 @@ class PieChartVisualization extends Visualization {
         const width = 450,
             height = 450;
 
-        return d3.select("#viz3")
+        return d3.select(this.visElement)
             .attr("width", width)
             .attr("height", height)
             .append("g")

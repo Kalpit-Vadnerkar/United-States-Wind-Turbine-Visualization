@@ -6,7 +6,7 @@ import {Visualization} from "./Visualization.js";
 class HistogramVisualization extends Visualization {
     constructor(turbineData) {
         super(turbineData);
-        this.visElement = "#viz4";
+        this.visElement = "#viz3";
     }
 
 
