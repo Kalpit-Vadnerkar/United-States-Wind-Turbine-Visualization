@@ -1,7 +1,7 @@
 // PieChart.js
 
 import {Visualization} from "./Visualization.js";
-import {ALL_VALUE, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, SECOND_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 
 function filterDataByState(turbineData, state) {
     return turbineData.filter(d => d.t_state === state);
@@ -115,24 +115,18 @@ class PieChartVisualization extends Visualization {
         addPercentageLabels(svg, pie, arcGenerator, topManufacturersData);
     }
 
-    setupSvg() {
-        const width = 450,
-            height = 450;
-
-        return d3.select(this.visElement)
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", `translate(${width / 2}, ${height / 2})`);
-    }
 
     draw() {
         const topManufacturersData = getTopManufacturersData(this.turbineData);
 
-        const svg = this.setupSvg();
+        const svg = d3.select(this.visElement)
+            .attr("width", SECOND_COL_DIMENSIONS.width)
+            .attr("height", SECOND_COL_DIMENSIONS.height)
+            .append("g")
+            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height/ 1.6})`);
         const colorScale = getColorScale(topManufacturersData);
 
-        const radius = 180;
+        const radius = 160;
 
         this.drawPie(svg, topManufacturersData, radius);
         this.createLegend(svg, colorScale, radius, topManufacturersData);

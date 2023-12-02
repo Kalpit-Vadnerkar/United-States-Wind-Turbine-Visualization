@@ -178,10 +178,7 @@ class TurbineMapVisualization extends Visualization {
     }
 
     draw() {
-        // let element = document.getElementById("viz1");
-        //
-        // const width = element.clientWidth;
-        // const height = element.clientHeight;
+
         const width = FIRST_COL_DIMENSIONS.width;
 
         var svg = d3.select(this.visElement);
@@ -189,7 +186,7 @@ class TurbineMapVisualization extends Visualization {
 
         // Create the projection
         // let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
-        let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height * 0.9, {type: "Sphere"});
+        let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height, {type: "Sphere"});
 
         // If the point is not within the frame of the projection, filter it out
         // This usually happens when the point is outside the US (in territories)

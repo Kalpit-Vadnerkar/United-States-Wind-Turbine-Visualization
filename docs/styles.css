@@ -9,6 +9,10 @@ main {
     /*padding: 20px;*/
 }
 
+fieldset {
+    margin: 4px;
+}
+
 #visualization {
     display: grid;
     grid-template-columns: 66% 33%;

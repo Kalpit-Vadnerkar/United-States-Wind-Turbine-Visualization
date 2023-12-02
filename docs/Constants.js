@@ -56,17 +56,17 @@ const EXCLUDED_STATES = ["KY", "SC", "FL", "GA", "LA", "AL", "MS"]; // No data f
 const ALL_VALUE = "---ALL---";
 
 const FIRST_COL_DIMENSIONS = {
-    width: 1200, height: 370,
+    width: 1200, height: 330,
     margin: {
-        top: 30, bottom: 30, right: 50, left: 50
+        top: 15, bottom: 15, right: 50, left: 50
     }
 };
 
 
 const SECOND_COL_DIMENSIONS = {
-    width: 600, height: 370,
+    width: 600, height: 330,
     margin: {
-        top: 30, bottom: 30, right: 50, left: 50
+        top: 15, bottom: 15, right: 50, left: 50
     }
 };
 

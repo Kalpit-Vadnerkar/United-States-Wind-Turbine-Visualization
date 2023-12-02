@@ -71,7 +71,7 @@ class HistogramVisualization extends Visualization {
             .attr("class", "x-label")
             .attr("text-anchor", "end")
             .attr("x", SECOND_COL_DIMENSIONS.width / 2 + SECOND_COL_DIMENSIONS.margin.left)
-            .attr("y", SECOND_COL_DIMENSIONS.height + 10)
+            .attr("y", SECOND_COL_DIMENSIONS.height + 15)
             .text("Turbine Capacity (kW)");
 
         // Y label
