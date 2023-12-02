@@ -16,13 +16,14 @@ class TurbineMapVisualization extends Visualization {
     }
 
     drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
-
-
         let pathGenerator = d3.geoPath(projection);
+        // console.log(pathGenerator.bounds());
         let path = svg.append("path")
             .attr("d", pathGenerator({type: "Sphere"}))
             .attr("stroke", "gray")
             .attr("fill", "lightblue");
+        let mapBounds = pathGenerator.bounds(mapData)
+
 
         let intervalRange = [];
         let factor = (range[1] - range[0]) / (colors.length - 1);
@@ -46,6 +47,14 @@ class TurbineMapVisualization extends Visualization {
                 return "darkgray"
             })
             .attr("d", d => pathGenerator(d))
+            .on("mouseenter", (d, i) => {
+                let count = countByState[i.properties.NAME]
+                console.log(i.properties.NAME, count);
+            })
+            .on("click", (d, i) => {
+                let count = countByState[i.properties.NAME]
+                console.log(i.properties.NAME, count);
+            });
 
         let points = svg.append("g")
             .selectAll(".point")
@@ -68,9 +77,11 @@ class TurbineMapVisualization extends Visualization {
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
             .text(title);
+
+        return mapBounds;
     }
 
-    drawLegend(svg, range) {
+    drawLegend(svg, range, mapBounds) {
         // Create the gradient first
         var gradient = svg.append("svg:defs")
             .append("svg:linearGradient")
@@ -174,7 +185,7 @@ class TurbineMapVisualization extends Visualization {
             .attr("dy", 15)
             .text(d => d);
 
-        legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.75 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
+        legend.attr("transform", "translate(" + (mapBounds[1][0] + FIRST_COL_DIMENSIONS.margin.left) + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
     }
 
     draw() {
@@ -221,8 +232,8 @@ class TurbineMapVisualization extends Visualization {
         let range = [minRounded, maxRounded];
 
         // Draw data
-        this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);
-        this.drawLegend(globalGroup, range);
+        let mapBounds = this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);
+        this.drawLegend(globalGroup, range, mapBounds);
 
         globalGroup.attr("transform", "translate(0, 30)");
     }

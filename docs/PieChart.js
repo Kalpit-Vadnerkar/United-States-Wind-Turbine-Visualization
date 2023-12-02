@@ -49,7 +49,7 @@ class PieChartVisualization extends Visualization {
 
     addTitle(svg, radius) {
 
-        let title = `Market Share by Manufacturer in ${this.selectedState == ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
+        let title = `Market Share by Manufacturer in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
 
         svg.append("text")
             .attr("x", 0)
