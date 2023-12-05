@@ -13,6 +13,10 @@ fieldset {
     margin: 4px;
 }
 
+a{
+    color: #2271a2;
+}
+
 #visualization {
     display: grid;
     grid-template-columns: 66% 33%;
