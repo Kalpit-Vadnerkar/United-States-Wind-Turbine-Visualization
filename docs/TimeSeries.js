@@ -68,7 +68,7 @@ class TimeSeriesVisualization extends Visualization {
 
         globalGroup.append("text")
             .attr("x", SECOND_COL_DIMENSIONS.width / 2)
-            .attr("y", 10)
+            .attr("y", -6)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
             .text(title);
@@ -77,7 +77,7 @@ class TimeSeriesVisualization extends Visualization {
             .attr("class", "x-label")
             .attr("text-anchor", "end")
             .attr("x", SECOND_COL_DIMENSIONS.width / 2 + SECOND_COL_DIMENSIONS.margin.left)
-            .attr("y", SECOND_COL_DIMENSIONS.height + 20)
+            .attr("y", SECOND_COL_DIMENSIONS.height + 10)
             .text("Year");
 
         globalGroup.append("text")

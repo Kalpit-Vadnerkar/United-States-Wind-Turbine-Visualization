@@ -123,7 +123,7 @@ class PieChartVisualization extends Visualization {
             .attr("width", SECOND_COL_DIMENSIONS.width)
             .attr("height", SECOND_COL_DIMENSIONS.height)
             .append("g")
-            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height / 1.6})`);
+            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height/ 1.6})`);
         const colorScale = getColorScale(topManufacturersData);
 
         const radius = 160;

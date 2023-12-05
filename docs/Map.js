@@ -21,12 +21,14 @@ class TurbineMapVisualization extends Visualization {
 
         this.mapData = mapData;
         this.visElement = "#viz1";
+        this.globalTransform = {k: 1, x: 0, y: 0};
     }
 
     drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
+        let m = svg.append("g").attr("id", "map");
         let pathGenerator = d3.geoPath(projection);
         // console.log(pathGenerator.bounds());
-        let path = svg.append("path")
+        let path = m.append("path")
             .attr("d", pathGenerator({type: "Sphere"}))
             .attr("stroke", "gray")
             .attr("fill", "lightblue");
@@ -40,9 +42,13 @@ class TurbineMapVisualization extends Visualization {
             intervalRange.push(range[0] + factor * i);
         }
 
-        let colorScale = d3.scaleLinear().domain(intervalRange).range(colors);
+        //let colorScale = d3.scaleLinear().domain(intervalRange).range(colors);
+        let maxCount = Math.max(...Object.values(countByState));
+        let minCount = Math.min(...Object.values(countByState)); // TODO Fix this
+        let colorScale = d3.scaleSequential(d3.interpolateReds).domain([minCount, maxCount]);
 
-        let states = svg.append("g")
+
+        let states = m.append("g")
             .selectAll(".state")
             .data(mapData.features)
             .enter()
@@ -56,43 +62,44 @@ class TurbineMapVisualization extends Visualization {
                 return "darkgray"
             })
             .attr("d", d => pathGenerator(d))
+
+
+        // Select the tooltip div
+        states
             .on("mouseover", (d, i) => {
-                // let count = countByState[i.properties.NAME];
-                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME])) {
-                    let id = "#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME];
-                    d3.select(id)
-                        .attr("fill", "yellow");
-                }
+                let tooltip = d3.select("#tooltip");
+
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+
+                tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
+
+                tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
+                tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[i.properties.NAME]);
 
             })
-            .on('mouseout', function (d, i) {
-                // let count = countByState[i.properties.NAME];
-                let id = "#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME];
-                d3.select(id)
-                    .attr("fill", d => {
-                        if (countByState[STATE_NAME_MAPPING2[d.properties.NAME]] != null && !EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
+            .on("mouseout", (d, i) => {
+                let tooltip = d3.select("#tooltip");
 
-                            return colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
-
-                        return "darkgray"
-                    });
-            })
-            .on("click", (d, i) => {
-                let data = {
-                    "newSelectedState": STATE_NAME_MAPPING2[i.properties.NAME],
-                    "oldSelectedState": this.selectedState
-                };
-                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME])) {
-                    globalEventManager.dispatch("stateSelected", data);
-                }
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", 0);
             });
 
-        let points = svg.append("g")
+
+        let turbineSizeScale = d3.scaleSqrt()
+            .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
+            .range([1, 5]); // min and max size of circles
+
+
+        let points = m.append("g")
             .selectAll(".point")
             .data(turbineData)
             .enter()
             .append("circle")
-            .attr("r", 3)
+            .attr("r", d => turbineSizeScale(d.p_cap))
+            //.attr("r", 3)
             .attr("fill", "#dca65a")
             .attr("stroke", "#332301")
             .attr("stroke-width", 1)
@@ -102,8 +109,8 @@ class TurbineMapVisualization extends Visualization {
             });
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
-        svg.append("text")
-            .attr("x", FIRST_COL_DIMENSIONS.width / 2)
+        m.append("text")
+            .attr("x", FIRST_COL_DIMENSIONS.width / 3)
             .attr("y", -15)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
@@ -219,11 +226,53 @@ class TurbineMapVisualization extends Visualization {
         legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.8 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
     }
 
+    drawTooltip(svg) {
+        let tooltip = svg.append("g")
+            .attr("id", "tooltip")
+            .style("opacity", 0);
+        tooltip
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 170)
+            .attr("height", 50)
+            .attr("stroke", "black")
+            .attr("fill", "white")
+            .attr("opacity", 0.9)
+            .attr("rx", "5px")
+            .attr("ry", "5px");
+        tooltip
+            .append("text")
+            .attr("id", "map-tooltip-state")
+            .attr("x", 5)
+            .attr("y", 20);
+        tooltip
+            .append("text")
+            .attr("id", "map-tooltip-quantity")
+            .attr("x", 5)
+            .attr("y", 45);
+
+
+        // stroke="red" stroke-width="10px" rx="10px" ry="10px"
+    }
+
     draw() {
 
         const width = FIRST_COL_DIMENSIONS.width;
 
-        var svg = d3.select(this.visElement);
+        // Define zoom behavior
+        let zoom = d3.zoom()
+            .scaleExtent([1, 8])  // Set min and max scale extent
+            .translateExtent([[0, 0], [width, FIRST_COL_DIMENSIONS.height]])
+            .on("zoom", (event) => {
+                this.globalTransform = event.transform;
+                console.log(this.globalTransform);
+
+                d3.select("#map").attr("transform", this.globalTransform);
+            });
+
+        // Apply zoom behavior to the SVG
+        let svg = d3.select(this.visElement).call(zoom);
         var globalGroup = svg.append("g");
 
         // Create the projection
@@ -237,6 +286,7 @@ class TurbineMapVisualization extends Visualization {
             let coords = projection([d.xlong, d.ylat]);
             return coords != null;
         });
+
 
         // Count how many turbines in each state
         let countByState = {}
@@ -266,6 +316,7 @@ class TurbineMapVisualization extends Visualization {
         // Draw data
         let mapBounds = this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);
         this.drawLegend(globalGroup, range, mapBounds);
+        this.drawLegend(globalGroup, range);
 
         globalGroup.attr("transform", "translate(0, 30)");
     }

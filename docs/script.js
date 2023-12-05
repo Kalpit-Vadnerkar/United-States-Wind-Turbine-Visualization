@@ -146,7 +146,7 @@ function populateManufacturerSelector(turbineData) {
 async function main() {
     // Load data
     console.log("Loading data");
-    var turbineData = await d3.csv("uswtdb_v6_1_20231128.csv");
+    var turbineData = await d3.csv("uswtdb_v6_0_20230531.csv");
     var mapData = await d3.json("gz_2010_us_040_00_500k.json");
 
     console.log("Setting up");
@@ -158,9 +158,9 @@ async function main() {
 
     console.log("Visualizing");
     generateVisualization1(turbineData, mapData);
-    generateVisualization2(turbineData);
-    generateVisualization3(turbineData);
-    generateVisualization4(turbineData);
+    // generateVisualization2(turbineData);
+    // generateVisualization3(turbineData);
+    // generateVisualization4(turbineData);
     console.log("Done");
 
 
