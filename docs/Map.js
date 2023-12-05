@@ -1,5 +1,5 @@
 // Map.js
-import {ALL_VALUE, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, EXCLUDED_STATES, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
 const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
@@ -16,8 +16,6 @@ class TurbineMapVisualization extends Visualization {
     }
 
     drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
-
-
         let pathGenerator = d3.geoPath(projection);
         let path = svg.append("path")
             .attr("d", pathGenerator({type: "Sphere"}))
@@ -35,7 +33,7 @@ class TurbineMapVisualization extends Visualization {
         let maxCount = Math.max(...Object.values(countByState));
         let minCount = Math.min(...Object.values(countByState));
         let colorScale = d3.scaleSequential(d3.interpolateReds).domain([minCount, maxCount]);
-        
+
 
         let states = svg.append("g")
             .selectAll(".state")
@@ -54,23 +52,30 @@ class TurbineMapVisualization extends Visualization {
 
         // Select the tooltip div
         let tooltip = d3.select("#tooltip");
-        states.on("mouseover", d => {
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", .9);
-            //tooltip.html("State: " + d.properties.NAME + "<br/>"  + "Turbines: " + countByState[d.properties.NAME])
-            tooltip.html("State: {NAME}" + "<br/>"  + "Turbines: {COUNT}")
-        })
-        .on("mouseout", () => {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
+        states
+            .on("mouseover", (d, i) => {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                if (EXCLUDED_STATES.includes(STATE_NAME_MAPPING[i.properties.NAME])) {
+                    tooltip.html("State: " + i.properties.NAME + "<br/>" + "Turbines: No data");
+
+                } else {
+                    tooltip.html("State: " + i.properties.NAME + "<br/>" + "Turbines: " + countByState[i.properties.NAME]);
+
+                }
+
+            })
+            .on("mouseout", (d, i) => {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
 
 
         let turbineSizeScale = d3.scaleSqrt()
-        .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
-        .range([1, 5]); // min and max size of circles
+            .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
+            .range([1, 5]); // min and max size of circles
 
 
         let points = svg.append("g")
@@ -212,13 +217,13 @@ class TurbineMapVisualization extends Visualization {
         let zoom = d3.zoom()
             .scaleExtent([1, 8])  // Set min and max scale extent
             .on("zoom", (event) => {
-            globalGroup.attr("transform", event.transform);
+                globalGroup.attr("transform", event.transform);
             });
 
         // Apply zoom behavior to the SVG
         let svg = d3.select(this.visElement).call(zoom);
         var globalGroup = svg.append("g");
-        
+
         // Create the projection
         // let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
         let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height, {type: "Sphere"});
