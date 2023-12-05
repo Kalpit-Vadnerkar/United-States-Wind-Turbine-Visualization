@@ -1,5 +1,5 @@
 // Map.js
-import {ALL_VALUE, EXCLUDED_STATES, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import {ALL_VALUE, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 
 const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
@@ -51,24 +51,23 @@ class TurbineMapVisualization extends Visualization {
 
 
         // Select the tooltip div
-        let tooltip = d3.select("#tooltip");
         states
             .on("mouseover", (d, i) => {
+                let tooltip = d3.select("#tooltip");
+
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", .9);
-                if (EXCLUDED_STATES.includes(STATE_NAME_MAPPING[i.properties.NAME])) {
-                    tooltip.html("State: " + i.properties.NAME + "<br/>" + "Turbines: No data");
-
-                } else {
-                    tooltip.html("State: " + i.properties.NAME + "<br/>" + "Turbines: " + countByState[i.properties.NAME]);
-
-                }
+                tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
+                tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
+                tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[i.properties.NAME]);
 
             })
             .on("mouseout", (d, i) => {
+                let tooltip = d3.select("#tooltip");
+
                 tooltip.transition()
-                    .duration(500)
+                    .duration(200)
                     .style("opacity", 0);
             });
 
@@ -209,6 +208,36 @@ class TurbineMapVisualization extends Visualization {
         legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.75 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
     }
 
+    drawTooltip(svg) {
+        let tooltip = svg.append("g")
+            .attr("id", "tooltip")
+            .style("opacity", 0);
+        tooltip
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 170)
+            .attr("height", 50)
+            .attr("stroke", "black")
+            .attr("fill", "white")
+            .attr("opacity", 0.9)
+            .attr("rx", "5px")
+            .attr("ry", "5px");
+        tooltip
+            .append("text")
+            .attr("id", "map-tooltip-state")
+            .attr("x", 5)
+            .attr("y", 20);
+        tooltip
+            .append("text")
+            .attr("id", "map-tooltip-quantity")
+            .attr("x", 5)
+            .attr("y", 45);
+
+
+        // stroke="red" stroke-width="10px" rx="10px" ry="10px"
+    }
+
     draw() {
 
         const width = FIRST_COL_DIMENSIONS.width;
@@ -261,8 +290,11 @@ class TurbineMapVisualization extends Visualization {
 
         let range = [minRounded, maxRounded];
 
+
         // Draw data
         this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);
+        this.drawTooltip(globalGroup);
+
         this.drawLegend(globalGroup, range);
 
         globalGroup.attr("transform", "translate(0, 30)");
