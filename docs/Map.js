@@ -31,7 +31,11 @@ class TurbineMapVisualization extends Visualization {
             intervalRange.push(range[0] + factor * i);
         }
 
-        let colorScale = d3.scaleLinear().domain(intervalRange).range(colors);
+        //let colorScale = d3.scaleLinear().domain(intervalRange).range(colors);
+        let maxCount = Math.max(...Object.values(countByState));
+        let minCount = Math.min(...Object.values(countByState));
+        let colorScale = d3.scaleSequential(d3.interpolateReds).domain([minCount, maxCount]);
+        
 
         let states = svg.append("g")
             .selectAll(".state")
@@ -47,12 +51,35 @@ class TurbineMapVisualization extends Visualization {
             })
             .attr("d", d => pathGenerator(d))
 
+
+        // Select the tooltip div
+        let tooltip = d3.select("#tooltip");
+        states.on("mouseover", d => {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            //tooltip.html("State: " + d.properties.NAME + "<br/>"  + "Turbines: " + countByState[d.properties.NAME])
+            tooltip.html("State: {NAME}" + "<br/>"  + "Turbines: {COUNT}")
+        })
+        .on("mouseout", () => {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+
+
+        let turbineSizeScale = d3.scaleSqrt()
+        .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
+        .range([1, 5]); // min and max size of circles
+
+
         let points = svg.append("g")
             .selectAll(".point")
             .data(turbineData)
             .enter()
             .append("circle")
-            .attr("r", 3)
+            .attr("r", d => turbineSizeScale(d.p_cap))
+            //.attr("r", 3)
             .attr("fill", "#dca65a")
             .attr("stroke", "#332301")
             .attr("stroke-width", 1)
@@ -63,8 +90,8 @@ class TurbineMapVisualization extends Visualization {
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         svg.append("text")
-            .attr("x", FIRST_COL_DIMENSIONS.width / 2)
-            .attr("y", -15)
+            .attr("x", FIRST_COL_DIMENSIONS.width / 3)
+            .attr("y", -6)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
             .text(title);
@@ -174,20 +201,27 @@ class TurbineMapVisualization extends Visualization {
             .attr("dy", 15)
             .text(d => d);
 
-        legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.8 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
+        legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.75 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
     }
 
     draw() {
 
         const width = FIRST_COL_DIMENSIONS.width;
 
-        var svg = d3.select(this.visElement);
-        var globalGroup = svg.append("g");
+        // Define zoom behavior
+        let zoom = d3.zoom()
+            .scaleExtent([1, 8])  // Set min and max scale extent
+            .on("zoom", (event) => {
+            globalGroup.attr("transform", event.transform);
+            });
 
+        // Apply zoom behavior to the SVG
+        let svg = d3.select(this.visElement).call(zoom);
+        var globalGroup = svg.append("g");
+        
         // Create the projection
         // let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
-        // let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height, {type: "Sphere"});
-        let projection = d3.geoAlbersUsa().fitSize([FIRST_COL_DIMENSIONS.width, FIRST_COL_DIMENSIONS.height], this.mapData);
+        let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height, {type: "Sphere"});
 
         // If the point is not within the frame of the projection, filter it out
         // This usually happens when the point is outside the US (in territories)
@@ -195,6 +229,7 @@ class TurbineMapVisualization extends Visualization {
             let coords = projection([d.xlong, d.ylat]);
             return coords != null;
         });
+
 
         // Count how many turbines in each state
         let countByState = {}
