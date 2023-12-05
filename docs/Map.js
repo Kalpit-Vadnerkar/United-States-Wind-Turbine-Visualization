@@ -13,11 +13,13 @@ class TurbineMapVisualization extends Visualization {
 
         this.mapData = mapData;
         this.visElement = "#viz1";
+        this.globalTransform = {k: 1, x: 0, y: 0};
     }
 
     drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
+        let m = svg.append("g").attr("id", "map");
         let pathGenerator = d3.geoPath(projection);
-        let path = svg.append("path")
+        let path = m.append("path")
             .attr("d", pathGenerator({type: "Sphere"}))
             .attr("stroke", "gray")
             .attr("fill", "lightblue");
@@ -35,7 +37,7 @@ class TurbineMapVisualization extends Visualization {
         let colorScale = d3.scaleSequential(d3.interpolateReds).domain([minCount, maxCount]);
 
 
-        let states = svg.append("g")
+        let states = m.append("g")
             .selectAll(".state")
             .data(mapData.features)
             .enter()
@@ -58,7 +60,9 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", .9);
+
                 tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
+
                 tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
                 tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[i.properties.NAME]);
 
@@ -77,7 +81,7 @@ class TurbineMapVisualization extends Visualization {
             .range([1, 5]); // min and max size of circles
 
 
-        let points = svg.append("g")
+        let points = m.append("g")
             .selectAll(".point")
             .data(turbineData)
             .enter()
@@ -93,7 +97,7 @@ class TurbineMapVisualization extends Visualization {
             });
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
-        svg.append("text")
+        m.append("text")
             .attr("x", FIRST_COL_DIMENSIONS.width / 3)
             .attr("y", -6)
             .attr("style", VIZ_TITLE_STYLE)
@@ -245,8 +249,12 @@ class TurbineMapVisualization extends Visualization {
         // Define zoom behavior
         let zoom = d3.zoom()
             .scaleExtent([1, 8])  // Set min and max scale extent
+            .translateExtent([[0, 0], [width, FIRST_COL_DIMENSIONS.height]])
             .on("zoom", (event) => {
-                globalGroup.attr("transform", event.transform);
+                this.globalTransform = event.transform;
+                console.log(this.globalTransform);
+
+                d3.select("#map").attr("transform", this.globalTransform);
             });
 
         // Apply zoom behavior to the SVG
