@@ -63,8 +63,8 @@ class TurbineMapVisualization extends Visualization {
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         svg.append("text")
-            .attr("x", FIRST_COL_DIMENSIONS.width / 3)
-            .attr("y", -6)
+            .attr("x", FIRST_COL_DIMENSIONS.width / 2)
+            .attr("y", -15)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
             .text(title);
@@ -174,7 +174,7 @@ class TurbineMapVisualization extends Visualization {
             .attr("dy", 15)
             .text(d => d);
 
-        legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.75 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
+        legend.attr("transform", "translate(" + FIRST_COL_DIMENSIONS.width * 0.8 + "," + ((FIRST_COL_DIMENSIONS.height / 2) - 90) + ")");
     }
 
     draw() {
@@ -186,7 +186,8 @@ class TurbineMapVisualization extends Visualization {
 
         // Create the projection
         // let projection = d3.geoAlbersUsa().fitWidth(width * 0.7, {type: "Sphere"});
-        let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height, {type: "Sphere"});
+        // let projection = d3.geoAlbersUsa().fitHeight(FIRST_COL_DIMENSIONS.height, {type: "Sphere"});
+        let projection = d3.geoAlbersUsa().fitSize([FIRST_COL_DIMENSIONS.width, FIRST_COL_DIMENSIONS.height], this.mapData);
 
         // If the point is not within the frame of the projection, filter it out
         // This usually happens when the point is outside the US (in territories)
