@@ -1,4 +1,5 @@
 import {ALL_VALUE} from "./Constants.js";
+import globalEventManager from "./EventManager.js";
 
 class Visualization {
     constructor(turbineData) {
@@ -7,7 +8,13 @@ class Visualization {
         this.originalTurbineData = turbineData;
         this.selectedState = ALL_VALUE;
         this.selectedManufacturer = ALL_VALUE;
+        globalEventManager.subscribe("stateSelected", (event, data) => {
+            this.filterByState(data.newSelectedState);
+            this.clear();
+            this.draw();
+        });
     }
+
 
     draw() {
 
@@ -18,6 +25,7 @@ class Visualization {
     }
 
     filterByState(state) {
+
         this.turbineData = this.originalTurbineData;
         this.selectedState = state;
 

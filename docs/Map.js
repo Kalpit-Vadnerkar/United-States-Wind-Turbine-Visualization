@@ -1,6 +1,14 @@
 // Map.js
-import {ALL_VALUE, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import {
+    ALL_VALUE,
+    EXCLUDED_STATES,
+    FIRST_COL_DIMENSIONS,
+    STATE_NAME_MAPPING,
+    STATE_NAME_MAPPING2,
+    VIZ_TITLE_STYLE
+} from "./Constants.js";
 import {Visualization} from "./Visualization.js";
+import globalEventManager from "./EventManager.js";
 
 const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
 
@@ -40,20 +48,43 @@ class TurbineMapVisualization extends Visualization {
             .enter()
             .append("path")
             .attr("class", "state")
+            .attr("id", d => "map-state-" + STATE_NAME_MAPPING2[d.properties.NAME])
             .attr("stroke", "lightgray")
             .attr("stroke-width", 1)
             .attr("fill", d => {
-                if (countByState[d.properties.NAME] != null) return colorScale(countByState[d.properties.NAME]);
+                if (countByState[STATE_NAME_MAPPING2[d.properties.NAME]] != null) return colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
                 return "darkgray"
             })
             .attr("d", d => pathGenerator(d))
-            .on("mouseenter", (d, i) => {
-                let count = countByState[i.properties.NAME]
-                console.log(i.properties.NAME, count);
+            .on("mouseover", (d, i) => {
+                // let count = countByState[i.properties.NAME];
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME])) {
+                    let id = "#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME];
+                    d3.select(id)
+                        .attr("fill", "yellow");
+                }
+
+            })
+            .on('mouseout', function (d, i) {
+                // let count = countByState[i.properties.NAME];
+                let id = "#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME];
+                d3.select(id)
+                    .attr("fill", d => {
+                        if (countByState[STATE_NAME_MAPPING2[d.properties.NAME]] != null && !EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
+
+                            return colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+
+                        return "darkgray"
+                    });
             })
             .on("click", (d, i) => {
-                let count = countByState[i.properties.NAME]
-                console.log(i.properties.NAME, count);
+                let data = {
+                    "newSelectedState": STATE_NAME_MAPPING2[i.properties.NAME],
+                    "oldSelectedState": this.selectedState
+                };
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME])) {
+                    globalEventManager.dispatch("stateSelected", data);
+                }
             });
 
         let points = svg.append("g")
@@ -211,11 +242,11 @@ class TurbineMapVisualization extends Visualization {
         let countByState = {}
         for (const turbineDatum of this.turbineData) {
 
-            if (STATE_NAME_MAPPING[turbineDatum.t_state] in countByState) {
-                countByState[STATE_NAME_MAPPING[turbineDatum.t_state]] += 1;
+            if (turbineDatum.t_state in countByState) {
+                countByState[turbineDatum.t_state] += 1;
 
             } else {
-                countByState[STATE_NAME_MAPPING[turbineDatum.t_state]] = 1;
+                countByState[turbineDatum.t_state] = 1;
             }
         }
 

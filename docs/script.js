@@ -3,6 +3,7 @@ import {HistogramVisualization} from './Histogram.js';
 import {TimeSeriesVisualization} from "./TimeSeries.js";
 import {TurbineMapVisualization} from "./Map.js";
 import {ALL_VALUE, EXCLUDED_STATES, STATE_NAME_MAPPING} from "./Constants.js";
+import globalEventManager from "./EventManager.js";
 
 
 var mapViz = null;
@@ -16,21 +17,31 @@ function stateSelector_onSelect(e) {
     }
     let stateSelector = document.getElementById("state-selector");
 
-    mapViz.filterByState(stateSelector.value);
-    mapViz.clear();
-    mapViz.draw();
+    globalEventManager.dispatch("stateSelected", {"newSelectedState": stateSelector.value})
 
-    timeViz.filterByState(stateSelector.value);
-    timeViz.clear();
-    timeViz.draw();
+}
 
-    pieViz.filterByState(stateSelector.value);
-    pieViz.clear();
-    pieViz.draw();
-
-    histViz.filterByState(stateSelector.value);
-    histViz.clear();
-    histViz.draw();
+//
+function stateSelectionCallback(event, data) {
+    let stateSelector = document.getElementById("state-selector");
+    stateSelector.value = data.newSelectedState;
+    // console.log(event);
+    // console.log(event, data);
+    // mapViz.filterByState(data.newSelectedState);
+    // mapViz.clear();
+    // mapViz.draw();
+    //
+    // timeViz.filterByState(data.newSelectedState);
+    // timeViz.clear();
+    // timeViz.draw();
+    //
+    // pieViz.filterByState(data.newSelectedState);
+    // pieViz.clear();
+    // pieViz.draw();
+    //
+    // histViz.filterByState(data.newSelectedState);
+    // histViz.clear();
+    // histViz.draw();
 }
 
 
@@ -143,12 +154,16 @@ async function main() {
     populateManufacturerSelector(turbineData);
 
 
+    globalEventManager.subscribe("stateSelected", stateSelectionCallback);
+
     console.log("Visualizing");
     generateVisualization1(turbineData, mapData);
     generateVisualization2(turbineData);
     generateVisualization3(turbineData);
     generateVisualization4(turbineData);
     console.log("Done");
+
+
 }
 
 
