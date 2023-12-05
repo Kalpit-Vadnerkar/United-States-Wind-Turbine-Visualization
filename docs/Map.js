@@ -1,16 +1,15 @@
 // Map.js
 import {
     ALL_VALUE,
-    EXCLUDED_STATES,
     FIRST_COL_DIMENSIONS,
     STATE_NAME_MAPPING,
     STATE_NAME_MAPPING2,
     VIZ_TITLE_STYLE
 } from "./Constants.js";
 import {Visualization} from "./Visualization.js";
-import globalEventManager from "./EventManager.js";
 
-const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
+// const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
+const colors = d3.interpolateReds;
 
 
 class TurbineMapVisualization extends Visualization {
@@ -22,12 +21,13 @@ class TurbineMapVisualization extends Visualization {
         this.mapData = mapData;
         this.visElement = "#viz1";
         this.globalTransform = {k: 1, x: 0, y: 0};
+        this.colorScale = null;
     }
 
     drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
         let m = svg.append("g").attr("id", "map");
         let pathGenerator = d3.geoPath(projection);
-        // console.log(pathGenerator.bounds());
+
         let path = m.append("path")
             .attr("d", pathGenerator({type: "Sphere"}))
             .attr("stroke", "gray")
@@ -35,17 +35,10 @@ class TurbineMapVisualization extends Visualization {
         let mapBounds = pathGenerator.bounds(mapData)
 
 
-        let intervalRange = [];
-        let factor = (range[1] - range[0]) / (colors.length - 1);
-
-        for (let i = 0; i < colors.length; i++) {
-            intervalRange.push(range[0] + factor * i);
-        }
-
-        //let colorScale = d3.scaleLinear().domain(intervalRange).range(colors);
-        let maxCount = Math.max(...Object.values(countByState));
-        let minCount = Math.min(...Object.values(countByState)); // TODO Fix this
-        let colorScale = d3.scaleSequential(d3.interpolateReds).domain([minCount, maxCount]);
+        if (typeof colors == 'function')
+            this.colorScale = d3.scaleSequential(colors).domain(range);
+        else
+            this.colorScale = d3.scaleLinear().domain(range).range(colors);
 
 
         let states = m.append("g")
@@ -58,7 +51,7 @@ class TurbineMapVisualization extends Visualization {
             .attr("stroke", "lightgray")
             .attr("stroke-width", 1)
             .attr("fill", d => {
-                if (countByState[STATE_NAME_MAPPING2[d.properties.NAME]] != null) return colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+                if (countByState[STATE_NAME_MAPPING2[d.properties.NAME]] != null) return this.colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
                 return "darkgray"
             })
             .attr("d", d => pathGenerator(d))
@@ -76,7 +69,7 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
 
                 tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
-                tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[i.properties.NAME]);
+                tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
 
             })
             .on("mouseout", (d, i) => {
@@ -110,7 +103,7 @@ class TurbineMapVisualization extends Visualization {
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         m.append("text")
-            .attr("x", FIRST_COL_DIMENSIONS.width / 3)
+            .attr("x", FIRST_COL_DIMENSIONS.width / 2)
             .attr("y", -15)
             .attr("style", VIZ_TITLE_STYLE)
             .attr("text-anchor", "middle")
@@ -130,15 +123,17 @@ class TurbineMapVisualization extends Visualization {
             .attr("y2", "1")
             .attr("spreadMethod", "pad");
 
-
-        for (let i = 0; i < colors.length; i++) {
-            let offset = (i / (colors.length - 1));
+        const numStops = 5;
+        let diff = range[1] - range[0];
+        let factor = diff / numStops;
+        for (let i = 0; i <= numStops; i++) {
+            let offset = i / numStops;
+            let c = this.colorScale(i * factor + range[0]);
             gradient.append("svg:stop")
-                .attr("offset", `${offset}`)
-                .attr("stop-color", colors[i])
+                .attr("offset", offset)
+                .attr("stop-color", c)
                 .attr("stop-opacity", 1);
         }
-
 
         // Start the legend
         const legend = svg
@@ -265,9 +260,6 @@ class TurbineMapVisualization extends Visualization {
             .scaleExtent([1, 8])  // Set min and max scale extent
             .translateExtent([[0, 0], [width, FIRST_COL_DIMENSIONS.height]])
             .on("zoom", (event) => {
-                this.globalTransform = event.transform;
-                console.log(this.globalTransform);
-
                 d3.select("#map").attr("transform", this.globalTransform);
             });
 
@@ -316,7 +308,7 @@ class TurbineMapVisualization extends Visualization {
         // Draw data
         let mapBounds = this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);
         this.drawLegend(globalGroup, range, mapBounds);
-        this.drawLegend(globalGroup, range);
+        this.drawTooltip(globalGroup);
 
         globalGroup.attr("transform", "translate(0, 30)");
     }
