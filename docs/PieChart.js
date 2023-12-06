@@ -2,6 +2,7 @@
 
 import {Visualization} from "./Visualization.js";
 import {ALL_VALUE, SECOND_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
+import globalEventManager from "./EventManager.js";
 
 function filterDataByState(turbineData, state) {
     return turbineData.filter(d => d.t_state === state);
@@ -106,11 +107,30 @@ class PieChartVisualization extends Visualization {
             .data(pie)
             .enter()
             .append('path')
+            .attr("id", d => "slice-" + d.index)
             .attr('d', arcGenerator)
             .attr('fill', d => colorScale(d.data.key))
             .attr("stroke", "white")
             .style("stroke-width", "2px")
-            .style("opacity", 0.7);
+            .style("opacity", .9)
+            .on("mouseover", (d, i) => {
+                svg.selectAll("#slice-" + i.index).style("stroke-width", 5);
+            })
+            .on("mouseout", (d, i) => {
+                svg.selectAll("#slice-" + i.index).style("stroke-width", 2);
+
+            })
+            .on("click", (d, i) => {
+                let manu = i.data.key;
+                if (manu === "" || manu === "Others") {
+                    // Do not filter by Unknown and Others
+                    return;
+                }
+                globalEventManager.dispatch("manufacturerSelected", {
+                    "newSelectedManufacturer": manu,
+                    oldSelectedManufacturer: this.selectedManufacturer
+                });
+            });
 
         addPercentageLabels(svg, pie, arcGenerator, topManufacturersData);
     }
@@ -123,7 +143,7 @@ class PieChartVisualization extends Visualization {
             .attr("width", SECOND_COL_DIMENSIONS.width)
             .attr("height", SECOND_COL_DIMENSIONS.height)
             .append("g")
-            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height/ 1.6})`);
+            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height / 1.6})`);
         const colorScale = getColorScale(topManufacturersData);
 
         const radius = 160;
