@@ -81,7 +81,7 @@ class TurbineMapVisualization extends Visualization {
                 else {
                     tooltip.selectAll("#map-tooltip-quantity").text("Turbines: No Data");
                 }
-                m.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
+                states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
             })
             .on("mouseout", (d, i) => {
                 let tooltip = d3.select("#tooltip");
@@ -89,13 +89,14 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", 0);
-                m.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
+                states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
+
             });
 
 
         let turbineSizeScale = d3.scaleSqrt()
             .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
-            .range([1, 5]); // min and max size of circles
+            .range([1, 3]); // min and max size of circles
 
 
         let points = m.append("g")

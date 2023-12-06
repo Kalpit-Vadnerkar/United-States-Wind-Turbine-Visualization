@@ -12,9 +12,9 @@ var pieViz = null;
 var histViz = null;
 
 function stateSelector_onSelect(e) {
-    if (mapViz == null || timeViz == null || pieViz == null || histViz == null) {
-        return false;
-    }
+    // if (mapViz == null || timeViz == null || pieViz == null || histViz == null) {
+    //     return false;
+    // }
     let stateSelector = document.getElementById("state-selector");
 
     globalEventManager.dispatch("stateSelected", {"newSelectedState": stateSelector.value})
@@ -25,8 +25,7 @@ function stateSelector_onSelect(e) {
 function stateSelectionCallback(event, data) {
     let stateSelector = document.getElementById("state-selector");
     stateSelector.value = data.newSelectedState;
-    // console.log(event);
-    // console.log(event, data);
+
     // mapViz.filterByState(data.newSelectedState);
     // mapViz.clear();
     // mapViz.draw();
