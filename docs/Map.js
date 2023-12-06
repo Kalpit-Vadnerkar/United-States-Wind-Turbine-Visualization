@@ -114,13 +114,18 @@ class TurbineMapVisualization extends Visualization {
             .attr("r", d => turbineSizeScale(d.p_cap))
             .attr("fill", d => {
                 if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
-                    return "#dca65a";
+                    if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                        return "#dca65a";
+                    }
                 }
                 return "#cebcb6";
             })
             .attr("opacity", d => {
+                console.log(this.selectedState, this.selectedManufacturer);
                 if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
-                    return 1;
+                    if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                        return 1;
+                    }
                 }
                 return 0.005;
             })

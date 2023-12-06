@@ -13,6 +13,11 @@ class Visualization {
             this.clear();
             this.draw();
         });
+        globalEventManager.subscribe("manufacturerSelected", (event, data) => {
+            this.filterByManufacturer(data.newSelectedManufacturer);
+            this.clear();
+            this.draw();
+        });
     }
 
 

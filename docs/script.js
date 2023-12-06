@@ -12,9 +12,7 @@ var pieViz = null;
 var histViz = null;
 
 function stateSelector_onSelect(e) {
-    // if (mapViz == null || timeViz == null || pieViz == null || histViz == null) {
-    //     return false;
-    // }
+
     let stateSelector = document.getElementById("state-selector");
 
     globalEventManager.dispatch("stateSelected", {"newSelectedState": stateSelector.value})
@@ -25,47 +23,21 @@ function stateSelector_onSelect(e) {
 function stateSelectionCallback(event, data) {
     let stateSelector = document.getElementById("state-selector");
     stateSelector.value = data.newSelectedState;
-
-    // mapViz.filterByState(data.newSelectedState);
-    // mapViz.clear();
-    // mapViz.draw();
-    //
-    // timeViz.filterByState(data.newSelectedState);
-    // timeViz.clear();
-    // timeViz.draw();
-    //
-    // pieViz.filterByState(data.newSelectedState);
-    // pieViz.clear();
-    // pieViz.draw();
-    //
-    // histViz.filterByState(data.newSelectedState);
-    // histViz.clear();
-    // histViz.draw();
 }
 
 
 function manufacturerSelector_onSelect(e) {
-    if (mapViz == null || timeViz == null || pieViz == null || histViz == null) {
-        return false;
-    }
+
     let manufacturerSelector = document.getElementById("manufacturer-selector");
 
-    mapViz.filterByManufacturer(manufacturerSelector.value);
-    mapViz.clear();
-    mapViz.draw();
-
-    timeViz.filterByManufacturer(manufacturerSelector.value);
-    timeViz.clear();
-    timeViz.draw();
-
-    pieViz.filterByManufacturer(manufacturerSelector.value);
-    pieViz.clear();
-    pieViz.draw();
-
-    histViz.filterByManufacturer(manufacturerSelector.value);
-    histViz.clear();
-    histViz.draw();
+    globalEventManager.dispatch("manufacturerSelected", {"newSelectedManufacturer": manufacturerSelector.value})
 }
+
+function manufacturerSelectionCallback(event, data) {
+    let manufacturerSelector = document.getElementById("manufacturer-selector");
+    manufacturerSelector.value = data.newSelectedManufacturer;
+}
+
 
 async function generateVisualization1(turbineData, mapData) {
     mapViz = new TurbineMapVisualization(turbineData, mapData);
@@ -154,12 +126,13 @@ async function main() {
 
 
     globalEventManager.subscribe("stateSelected", stateSelectionCallback);
+    globalEventManager.subscribe("manufacturerSelected", manufacturerSelectionCallback);
 
     console.log("Visualizing");
     generateVisualization1(turbineData, mapData);
     generateVisualization2(turbineData);
-    // generateVisualization3(turbineData);
-    // generateVisualization4(turbineData);
+    generateVisualization3(turbineData);
+    generateVisualization4(turbineData);
     console.log("Done");
 
 
