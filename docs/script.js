@@ -157,7 +157,7 @@ async function main() {
 
     console.log("Visualizing");
     generateVisualization1(turbineData, mapData);
-    // generateVisualization2(turbineData);
+    generateVisualization2(turbineData);
     // generateVisualization3(turbineData);
     // generateVisualization4(turbineData);
     console.log("Done");

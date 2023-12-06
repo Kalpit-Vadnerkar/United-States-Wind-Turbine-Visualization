@@ -7,6 +7,7 @@ import {
     VIZ_TITLE_STYLE
 } from "./Constants.js";
 import {Visualization} from "./Visualization.js";
+import globalEventManager from "./EventManager.js";
 
 // const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
 const colors = d3.interpolateReds;
@@ -90,7 +91,13 @@ class TurbineMapVisualization extends Visualization {
                     .duration(200)
                     .style("opacity", 0);
                 states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
-
+            })
+            .on("click", (d, i) => {
+                let selectedState = STATE_NAME_MAPPING2[i.properties.NAME];
+                globalEventManager.dispatch("stateSelected", {
+                    newSelectedState: selectedState,
+                    oldSelectedState: this.selectedState
+                });
             });
 
 
