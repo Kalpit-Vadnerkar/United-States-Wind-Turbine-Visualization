@@ -105,7 +105,7 @@ const STATE_NAME_MAPPING2 = {
    "Wyoming" : "WY"
 };
 
-const EXCLUDED_STATES = ["KY", "SC", "FL", "GA", "LA", "AL", "MS"]; // No data for these states
+const EXCLUDED_STATES = ["KY", "SC", "FL", "GA", "LA", "AL", "MS", undefined]; // No data for these states
 
 const ALL_VALUE = "---ALL---";
 

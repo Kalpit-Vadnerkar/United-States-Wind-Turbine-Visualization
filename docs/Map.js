@@ -1,6 +1,6 @@
 // Map.js
 import {
-    ALL_VALUE,
+    ALL_VALUE, EXCLUDED_STATES,
     FIRST_COL_DIMENSIONS,
     STATE_NAME_MAPPING,
     STATE_NAME_MAPPING2,
@@ -51,10 +51,16 @@ class TurbineMapVisualization extends Visualization {
             .attr("stroke", "lightgray")
             .attr("stroke-width", 1)
             .attr("fill", d => {
-                if (countByState[STATE_NAME_MAPPING2[d.properties.NAME]] != null) return this.colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
-                return "darkgray"
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[d.properties.NAME])) {
+                    let c = this.colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+                    if (this.selectedState === ALL_VALUE || STATE_NAME_MAPPING2[d.properties.NAME] === this.selectedState) {
+                        return c;
+                    }
+                    return c.replace("rbg", "rbga").replace(")", ", 0.5)");
+                }
+                return "darkgray";
             })
-            .attr("d", d => pathGenerator(d))
+            .attr("d", d => pathGenerator(d));
 
 
         // Select the tooltip div
@@ -69,8 +75,13 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
 
                 tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
-                tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
 
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
+                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
+                else {
+                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: No Data");
+                }
+                m.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
             })
             .on("mouseout", (d, i) => {
                 let tooltip = d3.select("#tooltip");
@@ -78,6 +89,7 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", 0);
+                m.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
             });
 
 
@@ -92,8 +104,18 @@ class TurbineMapVisualization extends Visualization {
             .enter()
             .append("circle")
             .attr("r", d => turbineSizeScale(d.p_cap))
-            //.attr("r", 3)
-            .attr("fill", "#dca65a")
+            .attr("fill", d => {
+                if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
+                    return "#dca65a";
+                }
+                return "#cebcb6";
+            })
+            .attr("opacity", d => {
+                if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
+                    return 1;
+                }
+                return 0.005;
+            })
             .attr("stroke", "#332301")
             .attr("stroke-width", 1)
             .attr('transform', d => {
@@ -260,7 +282,7 @@ class TurbineMapVisualization extends Visualization {
             .scaleExtent([1, 8])  // Set min and max scale extent
             .translateExtent([[0, 0], [width, FIRST_COL_DIMENSIONS.height]])
             .on("zoom", (event) => {
-                d3.select("#map").attr("transform", this.globalTransform);
+                d3.select("#map").attr("transform", event.transform);
             });
 
         // Apply zoom behavior to the SVG
@@ -316,4 +338,6 @@ class TurbineMapVisualization extends Visualization {
 
 }
 
-export {TurbineMapVisualization};
+export {
+    TurbineMapVisualization
+};
