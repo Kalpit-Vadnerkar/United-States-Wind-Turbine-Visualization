@@ -5,9 +5,10 @@ class Visualization {
     constructor(turbineData) {
         this.visElement = "";
         this.turbineData = turbineData;
-        this.originalTurbineData = turbineData;
+        // this.originalTurbineData = turbineData;
         this.selectedState = ALL_VALUE;
         this.selectedManufacturer = ALL_VALUE;
+
         globalEventManager.subscribe("stateSelected", (event, data) => {
             this.filterByState(data.newSelectedState);
             this.clear();

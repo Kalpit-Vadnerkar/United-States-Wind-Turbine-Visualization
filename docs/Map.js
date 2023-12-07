@@ -1,6 +1,7 @@
 // Map.js
 import {
-    ALL_VALUE, EXCLUDED_STATES,
+    ALL_VALUE,
+    EXCLUDED_STATES,
     FIRST_COL_DIMENSIONS,
     STATE_NAME_MAPPING,
     STATE_NAME_MAPPING2,
@@ -17,7 +18,7 @@ class TurbineMapVisualization extends Visualization {
     constructor(turbineData, mapData) {
         super();
         this.turbineData = turbineData;
-        this.originalTurbineData = turbineData;
+        // this.originalTurbineData = turbineData;
 
         this.mapData = mapData;
         this.visElement = "#viz1";
@@ -103,7 +104,7 @@ class TurbineMapVisualization extends Visualization {
 
         let turbineSizeScale = d3.scaleSqrt()
             .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
-            .range([1, 3]); // min and max size of circles
+            .range([1, 4]); // min and max size of circles
 
 
         let points = m.append("g")
