@@ -17,9 +17,17 @@ class TimeSeriesVisualization extends Visualization {
 
         var svg = d3.select(this.visElement);
 
+        let data = this.turbineData;
+
+        if (this.selectedState !== ALL_VALUE) {
+            data = data.filter(d => d.t_state === this.selectedState);
+        }
+        if (this.selectedManufacturer !== ALL_VALUE) {
+            data = data.filter(d => d.t_manu === this.selectedManufacturer);
+        }
         var globalGroup = svg.append("g");
         let countByYear = {}
-        for (const turbineDatum of this.turbineData) {
+        for (const turbineDatum of data) {
             let year = Number(turbineDatum.p_year);
             if (year === 0) continue; // Year is zero, ignore it
             if (year in countByYear) {

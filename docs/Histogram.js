@@ -110,7 +110,7 @@ class HistogramVisualization extends Visualization {
 
         let data = this.turbineData;
         if (this.selectedState !== ALL_VALUE) {
-            data = data.filter(d => d.state === this.selectedState);
+            data = data.filter(d => d.t_state === this.selectedState);
         }
         if (this.selectedManufacturer !== ALL_VALUE) {
             data = data.filter(d => d.t_manu === this.selectedManufacturer);
