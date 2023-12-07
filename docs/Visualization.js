@@ -11,13 +11,13 @@ class Visualization {
 
         globalEventManager.subscribe("stateSelected", (event, data) => {
             this.filterByState(data.newSelectedState);
-            this.clear();
-            this.draw();
+            // this.clear();
+            // this.draw();
         });
         globalEventManager.subscribe("manufacturerSelected", (event, data) => {
             this.filterByManufacturer(data.newSelectedManufacturer);
-            this.clear();
-            this.draw();
+            // this.clear();
+            // this.draw();
         });
     }
 
@@ -64,6 +64,9 @@ class Visualization {
         // }
 
         this.selectedManufacturer = manufacturer;
+    }
+
+    calculate() {
 
     }
 }

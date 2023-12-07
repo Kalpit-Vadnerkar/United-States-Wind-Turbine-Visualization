@@ -24,9 +24,16 @@ class TurbineMapVisualization extends Visualization {
         this.visElement = "#viz1";
         this.globalTransform = {k: 1, x: 0, y: 0};
         this.colorScale = null;
+        this.dataByState = this.calculate();
+        this.countByState = {};
+        for (const state of [...this.dataByState.keys()]) {
+            this.countByState[state] = this.dataByState.get(state).length;
+        }
+
+
     }
 
-    drawMapAndTurbines(svg, mapData, turbineData, projection, range, countByState) {
+    drawMapAndTurbines(svg, projection, range) {
         let m = svg.append("g").attr("id", "map");
         let pathGenerator = d3.geoPath(projection);
 
@@ -34,7 +41,7 @@ class TurbineMapVisualization extends Visualization {
             .attr("d", pathGenerator({type: "Sphere"}))
             .attr("stroke", "gray")
             .attr("fill", "lightblue");
-        let mapBounds = pathGenerator.bounds(mapData)
+        let mapBounds = pathGenerator.bounds(this.mapData)
 
 
         if (typeof colors == 'function')
@@ -43,9 +50,9 @@ class TurbineMapVisualization extends Visualization {
             this.colorScale = d3.scaleLinear().domain(range).range(colors);
 
 
-        let states = m.append("g")
+        this.states = m.append("g")
             .selectAll(".state")
-            .data(mapData.features)
+            .data(this.mapData.features)
             .enter()
             .append("path")
             .attr("class", "state")
@@ -53,8 +60,9 @@ class TurbineMapVisualization extends Visualization {
             .attr("stroke", "lightgray")
             .attr("stroke-width", 1)
             .attr("fill", d => {
+
                 if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[d.properties.NAME])) {
-                    let c = this.colorScale(countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+                    let c = this.colorScale(this.countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
                     if (this.selectedState === ALL_VALUE || STATE_NAME_MAPPING2[d.properties.NAME] === this.selectedState) {
                         return c;
                     }
@@ -66,7 +74,7 @@ class TurbineMapVisualization extends Visualization {
 
 
         // Select the tooltip div
-        states
+        this.states
             .on("mouseover", (d, i) => {
                 let tooltip = d3.select("#tooltip");
 
@@ -79,11 +87,11 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
 
                 if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
-                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + countByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
+                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + this.dataByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
                 else {
                     tooltip.selectAll("#map-tooltip-quantity").text("Turbines: No Data");
                 }
-                states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
+                this.states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
             })
             .on("mouseout", (d, i) => {
                 let tooltip = d3.select("#tooltip");
@@ -91,7 +99,7 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", 0);
-                states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
+                this.states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
             })
             .on("click", (d, i) => {
                 let selectedState = STATE_NAME_MAPPING2[i.properties.NAME];
@@ -103,31 +111,24 @@ class TurbineMapVisualization extends Visualization {
 
 
         let turbineSizeScale = d3.scaleSqrt()
-            .domain([d3.min(turbineData, d => d.p_cap), d3.max(turbineData, d => d.p_cap)])
+            .domain([d3.min(this.turbineData, d => d.p_cap), d3.max(this.turbineData, d => d.p_cap)])
             .range([1, 4]); // min and max size of circles
 
 
-        let points = m.append("g")
+        this.points = m.append("g")
             .selectAll(".point")
-            .data(turbineData)
+            .data(this.turbineData)
             .enter()
             .append("circle")
             .attr("r", d => turbineSizeScale(d.p_cap))
             .attr("fill", d => {
+
                 if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
                     if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
-                        return "#dca65a";
+                        return "rgba(220,166,90,1)";
                     }
                 }
-                return "#cebcb6";
-            })
-            .attr("opacity", d => {
-                if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
-                    if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
-                        return 1;
-                    }
-                }
-                return 0.005;
+                return "rgba(206,188,182,0.005)";
             })
             .attr("stroke", "#332301")
             .attr("stroke-width", 1)
@@ -145,6 +146,36 @@ class TurbineMapVisualization extends Visualization {
             .text(title);
 
         return mapBounds;
+    }
+
+
+    filterByState(state) {
+        super.filterByState(state);
+
+        if (this.states != null)
+            this.states.transition()
+                .attr("fill", d => {
+                    if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[d.properties.NAME])) {
+                        let c = this.colorScale(this.countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+                        if (this.selectedState === ALL_VALUE || STATE_NAME_MAPPING2[d.properties.NAME] === this.selectedState) {
+                            return c;
+                        }
+                        return c.replace("rbg", "rbga").replace(")", ", 0.5)");
+                    }
+                    return "darkgray";
+                });
+
+        if (this.points != null)
+            this.points.transition()
+                .attr("fill", d => {
+                    if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
+                        if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                            return "rgba(220,166,90,1)";
+                        }
+                    }
+                    return "rgba(206,188,182,0.005)";
+                });
+
     }
 
     drawLegend(svg, range, mapBounds) {
@@ -281,9 +312,12 @@ class TurbineMapVisualization extends Visualization {
             .attr("id", "map-tooltip-quantity")
             .attr("x", 5)
             .attr("y", 45);
+    }
 
 
-        // stroke="red" stroke-width="10px" rx="10px" ry="10px"
+    calculate() {
+        // Count how many turbines in each state
+        return d3.group(this.turbineData, d => d.t_state);
     }
 
     draw() {
@@ -315,20 +349,8 @@ class TurbineMapVisualization extends Visualization {
         });
 
 
-        // Count how many turbines in each state
-        let countByState = {}
-        for (const turbineDatum of this.turbineData) {
-
-            if (turbineDatum.t_state in countByState) {
-                countByState[turbineDatum.t_state] += 1;
-
-            } else {
-                countByState[turbineDatum.t_state] = 1;
-            }
-        }
-
-        let maxCount = Math.max(...Object.values(countByState));
-        let minCount = Math.min(...Object.values(countByState));
+        let maxCount = Math.max(...Object.values(this.countByState));
+        let minCount = Math.min(...Object.values(this.countByState));
 
         let maxNumDigits = Math.floor(Math.log10(maxCount));
         let maxRoundedDown = maxCount / (10 ** maxNumDigits);
@@ -341,7 +363,7 @@ class TurbineMapVisualization extends Visualization {
         let range = [minRounded, maxRounded];
 
         // Draw data
-        let mapBounds = this.drawMapAndTurbines(globalGroup, this.mapData, this.turbineData, projection, range, countByState);
+        let mapBounds = this.drawMapAndTurbines(globalGroup, projection, range);
         this.drawLegend(globalGroup, range, mapBounds);
         this.drawTooltip(globalGroup);
 
