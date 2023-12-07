@@ -2,22 +2,7 @@
 
 import {Visualization} from "./Visualization.js";
 import {ALL_VALUE, SECOND_COL_DIMENSIONS, STATE_NAME_MAPPING, VIZ_TITLE_STYLE} from "./Constants.js";
-
-function filterDataByState(turbineData, state) {
-    return turbineData.filter(d => d.t_state === state);
-}
-
-function getTopManufacturersData(filteredData) {
-    const manufacturerCounts = d3.rollup(filteredData, v => v.length, d => d.t_manu);
-    let sortedData = Array.from(manufacturerCounts).sort((a, b) => b[1] - a[1]);
-    let topFiveData = sortedData.slice(0, 5);
-    const othersCount = sortedData.slice(5).reduce((acc, curr) => acc + curr[1], 0);
-    if (othersCount > 0) {
-        topFiveData.push(['Others', othersCount]);
-    }
-    return topFiveData.map(([key, value]) => ({key, value}));
-}
-
+import globalEventManager from "./EventManager.js";
 
 function getColorScale(dataReady) {
     return d3.scaleOrdinal()
@@ -47,9 +32,33 @@ class PieChartVisualization extends Visualization {
 
     }
 
+
+    filterDataByState(turbineData, state) {
+        return turbineData.filter(d => d.t_state === state);
+    }
+
+    getTopManufacturersData() {
+        let data = this.turbineData;
+        if (this.selectedState !== ALL_VALUE) {
+            data = data.filter(d => d.t_state === this.selectedState);
+        }
+        if (this.selectedManufacturer !== ALL_VALUE) {
+            data = data.filter(d => d.t_manu === this.selectedManufacturer);
+        }
+        const manufacturerCounts = d3.rollup(data, v => v.length, d => d.t_manu);
+        let sortedData = Array.from(manufacturerCounts).sort((a, b) => b[1] - a[1]);
+        let topFiveData = sortedData.slice(0, 5);
+        const othersCount = sortedData.slice(5).reduce((acc, curr) => acc + curr[1], 0);
+        if (othersCount > 0) {
+            topFiveData.push(['Others', othersCount]);
+        }
+        return topFiveData.map(([key, value]) => ({key, value}));
+    }
+
+
     addTitle(svg, radius) {
 
-        let title = `Market Share by Manufacturer in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
+        let title = `Market Share by Manufacturer in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]} ${this.selectedManufacturer === ALL_VALUE ? "" : "(Only " + this.selectedManufacturer + ")"}`;
 
         svg.append("text")
             .attr("x", 0)
@@ -106,24 +115,44 @@ class PieChartVisualization extends Visualization {
             .data(pie)
             .enter()
             .append('path')
+            .attr("id", d => "slice-" + d.index)
             .attr('d', arcGenerator)
             .attr('fill', d => colorScale(d.data.key))
             .attr("stroke", "white")
             .style("stroke-width", "2px")
-            .style("opacity", 0.7);
+            .style("opacity", .9)
+            .on("mouseover", (d, i) => {
+                svg.selectAll("#slice-" + i.index).style(
+                    "stroke-width", 5);
+            })
+            .on("mouseout", (d, i) => {
+                svg.selectAll("#slice-" + i.index).style("stroke-width", 2);
+
+            })
+            .on("click", (d, i) => {
+                let manu = i.data.key;
+                if (manu === "" || manu === "Others") {
+                    // Do not filter by Unknown and Others
+                    return;
+                }
+                globalEventManager.dispatch("manufacturerSelected", {
+                    "newSelectedManufacturer": manu,
+                    oldSelectedManufacturer: this.selectedManufacturer
+                });
+            });
 
         addPercentageLabels(svg, pie, arcGenerator, topManufacturersData);
     }
 
 
     draw() {
-        const topManufacturersData = getTopManufacturersData(this.turbineData);
+        const topManufacturersData = this.getTopManufacturersData();
 
         const svg = d3.select(this.visElement)
             .attr("width", SECOND_COL_DIMENSIONS.width)
             .attr("height", SECOND_COL_DIMENSIONS.height)
             .append("g")
-            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height/ 1.6})`);
+            .attr("transform", `translate(${SECOND_COL_DIMENSIONS.width / 2}, ${SECOND_COL_DIMENSIONS.height / 1.6})`);
         const colorScale = getColorScale(topManufacturersData);
 
         const radius = 160;
