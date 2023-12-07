@@ -121,7 +121,6 @@ class TurbineMapVisualization extends Visualization {
                 return "#cebcb6";
             })
             .attr("opacity", d => {
-                console.log(this.selectedState, this.selectedManufacturer);
                 if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
                     if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
                         return 1;
