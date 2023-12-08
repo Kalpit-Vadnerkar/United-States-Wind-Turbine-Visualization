@@ -6,8 +6,8 @@ import {Visualization} from "./Visualization.js";
 import globalEventManager from "./EventManager.js";
 
 const ZOOM_TURBINE_LEVEL = 8;
-const TURBINE_VALID_SELECTION_COLOR = "rgb(84,152,0)";
-const TURBINE_INVALID_SELECTION_COLOR = "rgb(124,126,120)";
+const TURBINE_VALID_SELECTION_COLOR = "rgb(231,6,221)";
+const TURBINE_INVALID_SELECTION_COLOR = "rgb(172,141,194)";
 const PROJECT_VALID_SELECTION_COLOR = "rgb(220, 166, 90)";
 const PROJECT_INVALID_SELECTION_COLOR = "rgb(206,188,182)";
 const TRANSPARENT_COLOR = "rgba(0,0,0,0)";
@@ -288,7 +288,7 @@ class TurbineMapVisualization extends Visualization {
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         d3.select(".map-title").transition()
             .text(title);
-        
+
     }
 
     drawLegend(svg, range, mapBounds) {
