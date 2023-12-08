@@ -179,7 +179,7 @@ class TurbineMapVisualization extends Visualization {
             .attr("id", "turbine-points");
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
-        mapGroup.append("text")
+        mapGroup.append("text").attr("class", "map-title")
             .attr("x", FIRST_COL_DIMENSIONS.width / 2)
             .attr("y", -15)
             .attr("style", VIZ_TITLE_STYLE)
@@ -234,6 +234,10 @@ class TurbineMapVisualization extends Visualization {
 
             })
             .attr("r", 1 / this.globalTransform.k);
+
+        let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
+        d3.select(".map-title").transition()
+            .text(title);
     }
 
     filterByManufacturer(manufacturer) {
@@ -281,6 +285,10 @@ class TurbineMapVisualization extends Visualization {
             })
             .attr("r", 1 / this.globalTransform.k);
 
+        let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
+        d3.select(".map-title").transition()
+            .text(title);
+        
     }
 
     drawLegend(svg, range, mapBounds) {

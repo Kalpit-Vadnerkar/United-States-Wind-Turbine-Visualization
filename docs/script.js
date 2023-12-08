@@ -19,7 +19,6 @@ function stateSelector_onSelect(e) {
 
 }
 
-//
 function stateSelectionCallback(event, data) {
     let stateSelector = document.getElementById("state-selector");
     stateSelector.value = data.newSelectedState;
