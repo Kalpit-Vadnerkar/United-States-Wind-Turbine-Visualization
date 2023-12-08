@@ -33,10 +33,6 @@ class TurbineMapVisualization extends Visualization {
         this.globalTransform = d3.zoomIdentity;
         this.colorScale = null;
         this.calculate();
-        this.countByState = {};
-        for (const state of [...this.dataByState.keys()]) {
-            this.countByState[state] = this.dataByState.get(state).length;
-        }
 
 
     }
@@ -450,10 +446,11 @@ class TurbineMapVisualization extends Visualization {
     calculate() {
 
         this.projects = d3.group(this.turbineData, d => d.p_name);
-
         this.dataByState = d3.group(this.turbineData, d => d.t_state);
-        this.dataByManufacturer = d3.group(this.turbineData, d => d.t_manu);
-
+        this.countByState = {};
+        for (const state of [...this.dataByState.keys()]) {
+            this.countByState[state] = this.dataByState.get(state).length;
+        }
     }
 
 

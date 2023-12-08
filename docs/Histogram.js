@@ -10,6 +10,18 @@ class HistogramVisualization extends Visualization {
     }
 
 
+    filterByManufacturer(manufacturer) {
+        super.filterByManufacturer(manufacturer);
+        this.clear();
+        this.draw();
+    }
+
+    filterByState(state) {
+        super.filterByState(state);
+        this.clear();
+        this.draw();
+    }
+
     createXScale(data) {
         return d3.scaleLinear()
             .domain(d3.extent(data, d => +d.t_cap)) // Use the extent of turbine capacities

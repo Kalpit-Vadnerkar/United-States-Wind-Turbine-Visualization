@@ -12,6 +12,18 @@ class TimeSeriesVisualization extends Visualization {
         this.visElement = "#viz2";
     }
 
+    filterByManufacturer(manufacturer) {
+        super.filterByManufacturer(manufacturer);
+        this.clear();
+        this.draw();
+    }
+
+    filterByState(state) {
+        super.filterByState(state);
+        this.clear();
+        this.draw();
+    }
+
     draw() {
         let color = "#0d9d8c";
 

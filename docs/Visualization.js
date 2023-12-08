@@ -66,9 +66,7 @@ class Visualization {
         this.selectedManufacturer = manufacturer;
     }
 
-    calculate() {
 
-    }
 }
 
 export {Visualization};

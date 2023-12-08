@@ -33,8 +33,16 @@ class PieChartVisualization extends Visualization {
     }
 
 
-    filterDataByState(turbineData, state) {
-        return turbineData.filter(d => d.t_state === state);
+    filterByManufacturer(manufacturer) {
+        super.filterByManufacturer(manufacturer);
+        this.clear();
+        this.draw();
+    }
+
+    filterByState(state) {
+        super.filterByState(state);
+        this.clear();
+        this.draw();
     }
 
     getTopManufacturersData() {
