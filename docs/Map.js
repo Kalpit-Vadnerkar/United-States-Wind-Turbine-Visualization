@@ -6,7 +6,8 @@ import {Visualization} from "./Visualization.js";
 import globalEventManager from "./EventManager.js";
 
 const ZOOM_TURBINE_LEVEL = 8;
-const TURBINE_COLOR = "rgb(84,152,0)";
+const TURBINE_VALID_SELECTION_COLOR = "rgb(84,152,0)";
+const TURBINE_INVALID_SELECTION_COLOR = "rgb(124,126,120)";
 const PROJECT_VALID_SELECTION_COLOR = "rgb(220, 166, 90)";
 const PROJECT_INVALID_SELECTION_COLOR = "rgb(206,188,182)";
 const TRANSPARENT_COLOR = "rgba(0,0,0,0)";
@@ -31,7 +32,7 @@ class TurbineMapVisualization extends Visualization {
         this.globalTransform = {k: 1, x: 0, y: 0};
         this.globalTransform = d3.zoomIdentity;
         this.colorScale = null;
-        this.dataByState = this.calculate();
+        this.calculate();
         this.countByState = {};
         for (const state of [...this.dataByState.keys()]) {
             this.countByState[state] = this.dataByState.get(state).length;
@@ -224,6 +225,66 @@ class TurbineMapVisualization extends Visualization {
                 return TRANSPARENT_COLOR;
             });
 
+        this.turbinePoints.selectAll("*")
+            .transition()
+            .attr("fill", d => {
+                // console.log(d)
+                if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
+                    if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                        return TURBINE_VALID_SELECTION_COLOR;
+                    }
+                }
+                return TURBINE_INVALID_SELECTION_COLOR;
+
+            })
+            .attr("r", 1 / this.globalTransform.k);
+    }
+
+    filterByManufacturer(manufacturer) {
+        super.filterByManufacturer(manufacturer);
+
+        if (this.states != null) this.states.transition()
+            .attr("fill", d => {
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[d.properties.NAME])) {
+                    let c = this.colorScale(this.countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+                    if (this.selectedState === ALL_VALUE || STATE_NAME_MAPPING2[d.properties.NAME] === this.selectedState) {
+                        return c;
+                    }
+                    return c.replace("rbg", "rbga").replace(")", ", 0.5)");
+                }
+                return "darkgray";
+            });
+
+        if (this.projectPoints != null) this.projectPoints.transition()
+            .attr("fill", d => {
+                let projects = d[1];
+                let states = projects.map(x => x.t_state);
+                let manufs = projects.map(x => x.t_manu);
+                if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
+                    if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                        if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
+                            return PROJECT_VALID_SELECTION_COLOR;
+                        }
+                    }
+                    return PROJECT_INVALID_SELECTION_COLOR;
+                }
+                return TRANSPARENT_COLOR;
+            });
+
+        this.turbinePoints.selectAll("*")
+            .transition()
+            .attr("fill", d => {
+                // console.log(d)
+                if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
+                    if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                        return TURBINE_VALID_SELECTION_COLOR;
+                    }
+                }
+                return TURBINE_INVALID_SELECTION_COLOR;
+
+            })
+            .attr("r", 1 / this.globalTransform.k);
+
     }
 
     drawLegend(svg, range, mapBounds) {
@@ -341,7 +402,7 @@ class TurbineMapVisualization extends Visualization {
             .append("circle")
             .attr("class", "legend-turbine-point")
             .attr("r", 7)
-            .attr("fill", TURBINE_COLOR)
+            .attr("fill", TURBINE_VALID_SELECTION_COLOR)
             .attr("transform", "translate(58, 205)");
 
         const turbinePointLabel = legend
@@ -390,7 +451,8 @@ class TurbineMapVisualization extends Visualization {
 
         this.projects = d3.group(this.turbineData, d => d.p_name);
 
-        return d3.group(this.turbineData, d => d.t_state);
+        this.dataByState = d3.group(this.turbineData, d => d.t_state);
+        this.dataByManufacturer = d3.group(this.turbineData, d => d.t_manu);
 
     }
 
@@ -418,7 +480,14 @@ class TurbineMapVisualization extends Visualization {
                 .data(filtered)
                 .enter()
                 .append("circle")
-                .attr("fill", TURBINE_COLOR)
+                .attr("fill", d => {
+                    if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
+                        if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                            return TURBINE_VALID_SELECTION_COLOR;
+                        }
+                    }
+                    return TURBINE_INVALID_SELECTION_COLOR;
+                })
                 .attr("r", 1 / this.globalTransform.k)
                 .attr('transform', d => {
                     let coord = this.projection([d.xlong, d.ylat]);
@@ -431,7 +500,6 @@ class TurbineMapVisualization extends Visualization {
         d3.selectAll(".legend-project-point")
             .transition()
             .attr("fill", d => {
-                console.log(this.globalTransform.k);
                 if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
                     return PROJECT_VALID_SELECTION_COLOR;
                 }
