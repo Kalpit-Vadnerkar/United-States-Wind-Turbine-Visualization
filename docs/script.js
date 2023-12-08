@@ -117,7 +117,7 @@ function populateManufacturerSelector(turbineData) {
 async function main() {
     // Load data
     console.log("Loading data");
-    var turbineData = await d3.csv("uswtdb_v6_1_20231128.csv");
+    var turbineData = await d3.csv("uswtdb_v6_1_20231128_clean.csv");
     var mapData = await d3.json("gz_2010_us_040_00_500k.json");
 
     console.log("Setting up");

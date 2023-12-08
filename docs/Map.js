@@ -10,6 +10,11 @@ import {
 import {Visualization} from "./Visualization.js";
 import globalEventManager from "./EventManager.js";
 
+
+function getAvgPosition(datalist) {
+    return [d3.mean(datalist, d => d.xlong), d3.mean(datalist, d => d.ylat)];
+}
+
 // const colors = ["#0d9d8c", "#e3c03f", "#a18b26", "#96e82c"];
 const colors = d3.interpolateReds;
 
@@ -79,7 +84,6 @@ class TurbineMapVisualization extends Visualization {
                 let tooltip = d3.select("#tooltip");
 
                 tooltip.transition()
-                    .duration(200)
                     .style("opacity", .9);
 
                 tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
@@ -87,7 +91,7 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
 
                 if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
-                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + this.dataByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
+                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + this.countByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
                 else {
                     tooltip.selectAll("#map-tooltip-quantity").text("Turbines: No Data");
                 }
@@ -97,7 +101,6 @@ class TurbineMapVisualization extends Visualization {
                 let tooltip = d3.select("#tooltip");
 
                 tooltip.transition()
-                    .duration(200)
                     .style("opacity", 0);
                 this.states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "lightgray").attr("stroke-width", 1);
             })
@@ -112,30 +115,61 @@ class TurbineMapVisualization extends Visualization {
 
         let turbineSizeScale = d3.scaleSqrt()
             .domain([d3.min(this.turbineData, d => d.p_cap), d3.max(this.turbineData, d => d.p_cap)])
-            .range([1, 4]); // min and max size of circles
+            .range([1, 5]); // min and max size of circles
 
 
         this.points = m.append("g")
             .selectAll(".point")
-            .data(this.turbineData)
+            .data(this.projects)
             .enter()
             .append("circle")
-            .attr("r", d => turbineSizeScale(d.p_cap))
+            // .attr("class", d => "point point-" + d.t_state)
+            .attr("r", d => turbineSizeScale(d[1].length))
             .attr("fill", d => {
+                let projects = d[1];
+                let states = projects.map(x => x.t_state);
+                let manufs = projects.map(x => x.t_manu);
 
-                if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
-                    if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                    if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
                         return "rgba(220,166,90,1)";
                     }
                 }
-                return "rgba(206,188,182,0.005)";
+                return "rgba(206,188,182,0.05)";
             })
             .attr("stroke", "#332301")
             .attr("stroke-width", 1)
             .attr('transform', d => {
-                let coords = projection([d.xlong, d.ylat]);
-                return "translate(" + projection([d.xlong, d.ylat]) + ")";
+                let pos = getAvgPosition(d[1]);
+                pos = projection(pos);
+                return "translate(" + pos + ")";
             });
+
+
+        this.points
+            .on("mouseover", (d, i) => {
+                let projectName = i[0]
+                let projects = i[1];
+                let tooltip = d3.select("#tooltip");
+
+                tooltip.transition()
+                    .style("opacity", .9);
+
+                tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
+
+                tooltip.selectAll("#map-tooltip-state").text("Project Name: " + projectName);
+                tooltip.selectAll("#map-tooltip-quantity").text("No. of Turbines: " + projects.length);
+
+                tooltip.attr("width", projectName.length * 20);
+
+
+            })
+            .on("mouseout", (d, i) => {
+                let tooltip = d3.select("#tooltip");
+                tooltip.attr("opacity", 0);
+
+            });
+
 
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
         m.append("text")
@@ -168,12 +202,16 @@ class TurbineMapVisualization extends Visualization {
         if (this.points != null)
             this.points.transition()
                 .attr("fill", d => {
-                    if (this.selectedState === ALL_VALUE || d.t_state === this.selectedState) {
-                        if (this.selectedManufacturer === ALL_VALUE || d.t_manu === this.selectedManufacturer) {
+                    let projects = d[1];
+                    let states = projects.map(x => x.t_state);
+                    let manufs = projects.map(x => x.t_manu);
+
+                    if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                        if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
                             return "rgba(220,166,90,1)";
                         }
                     }
-                    return "rgba(206,188,182,0.005)";
+                    return "rgba(206,188,182,0.05)";
                 });
 
     }
@@ -240,7 +278,7 @@ class TurbineMapVisualization extends Visualization {
         const gradientLabel = legend.append("text")
             .attr("transform", "translate(65, 80)")
             .selectAll("tspan")
-            .data(["Number of", "Turbine Projects"])
+            .data(["Number of", "Turbines"])
             .enter()
             .append("tspan")
             .attr("x", 15)
@@ -277,7 +315,7 @@ class TurbineMapVisualization extends Visualization {
             .append("text")
             .attr("transform", "translate(63, 155)")
             .selectAll("tspan")
-            .data(["Location of", "Turbines"])
+            .data(["Location of", "Turbines Projects"])
             .enter()
             .append("tspan")
             .attr("x", 15)
@@ -316,8 +354,11 @@ class TurbineMapVisualization extends Visualization {
 
 
     calculate() {
-        // Count how many turbines in each state
+
+        this.projects = d3.group(this.turbineData, d => d.p_name);
+
         return d3.group(this.turbineData, d => d.t_state);
+
     }
 
     draw() {
