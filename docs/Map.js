@@ -1,16 +1,11 @@
 // Map.js
 import {
-    ALL_VALUE,
-    EXCLUDED_STATES,
-    FIRST_COL_DIMENSIONS,
-    STATE_NAME_MAPPING,
-    STATE_NAME_MAPPING2,
-    VIZ_TITLE_STYLE
+    ALL_VALUE, EXCLUDED_STATES, FIRST_COL_DIMENSIONS, STATE_NAME_MAPPING, STATE_NAME_MAPPING2, VIZ_TITLE_STYLE
 } from "./Constants.js";
 import {Visualization} from "./Visualization.js";
 import globalEventManager from "./EventManager.js";
 
-const ZOOM_TURBINE_LEVEL = 6;
+const ZOOM_TURBINE_LEVEL = 8;
 const TURBINE_COLOR = "rgb(84,152,0)";
 const PROJECT_VALID_SELECTION_COLOR = "rgb(220, 166, 90)";
 const PROJECT_INVALID_SELECTION_COLOR = "rgb(206,188,182)";
@@ -58,10 +53,7 @@ class TurbineMapVisualization extends Visualization {
         let mapBounds = pathGenerator.bounds(this.mapData)
 
 
-        if (typeof colors == 'function')
-            this.colorScale = d3.scaleSequential(colors).domain(range);
-        else
-            this.colorScale = d3.scaleLinear().domain(range).range(colors);
+        if (typeof colors == 'function') this.colorScale = d3.scaleSequential(colors).domain(range); else this.colorScale = d3.scaleLinear().domain(range).range(colors);
 
 
         this.states = mapGroup.append("g")
@@ -101,8 +93,7 @@ class TurbineMapVisualization extends Visualization {
                 let quantityLabel = "Turbines: No Data";
                 tooltip.selectAll("#map-tooltip-state").text(stateLabel);
 
-                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
-                    quantityLabel = "Turbines: " + this.countByState[STATE_NAME_MAPPING2[i.properties.NAME]];
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME])) quantityLabel = "Turbines: " + this.countByState[STATE_NAME_MAPPING2[i.properties.NAME]];
                 tooltip.selectAll("#map-tooltip-quantity").text(quantityLabel);
 
                 this.states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
@@ -118,8 +109,7 @@ class TurbineMapVisualization extends Visualization {
             .on("click", (d, i) => {
                 let selectedState = STATE_NAME_MAPPING2[i.properties.NAME];
                 globalEventManager.dispatch("stateSelected", {
-                    newSelectedState: selectedState,
-                    oldSelectedState: this.selectedState
+                    newSelectedState: selectedState, oldSelectedState: this.selectedState
                 });
             });
 
@@ -206,35 +196,33 @@ class TurbineMapVisualization extends Visualization {
     filterByState(state) {
         super.filterByState(state);
 
-        if (this.states != null)
-            this.states.transition()
-                .attr("fill", d => {
-                    if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[d.properties.NAME])) {
-                        let c = this.colorScale(this.countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
-                        if (this.selectedState === ALL_VALUE || STATE_NAME_MAPPING2[d.properties.NAME] === this.selectedState) {
-                            return c;
-                        }
-                        return c.replace("rbg", "rbga").replace(")", ", 0.5)");
+        if (this.states != null) this.states.transition()
+            .attr("fill", d => {
+                if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[d.properties.NAME])) {
+                    let c = this.colorScale(this.countByState[STATE_NAME_MAPPING2[d.properties.NAME]]);
+                    if (this.selectedState === ALL_VALUE || STATE_NAME_MAPPING2[d.properties.NAME] === this.selectedState) {
+                        return c;
                     }
-                    return "darkgray";
-                });
+                    return c.replace("rbg", "rbga").replace(")", ", 0.5)");
+                }
+                return "darkgray";
+            });
 
-        if (this.projectPoints != null)
-            this.projectPoints.transition()
-                .attr("fill", d => {
-                    let projects = d[1];
-                    let states = projects.map(x => x.t_state);
-                    let manufs = projects.map(x => x.t_manu);
-                    if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
-                        if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
-                            if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
-                                return PROJECT_VALID_SELECTION_COLOR;
-                            }
+        if (this.projectPoints != null) this.projectPoints.transition()
+            .attr("fill", d => {
+                let projects = d[1];
+                let states = projects.map(x => x.t_state);
+                let manufs = projects.map(x => x.t_manu);
+                if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
+                    if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                        if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
+                            return PROJECT_VALID_SELECTION_COLOR;
                         }
-                        return PROJECT_INVALID_SELECTION_COLOR;
                     }
-                    return TRANSPARENT_COLOR;
-                });
+                    return PROJECT_INVALID_SELECTION_COLOR;
+                }
+                return TRANSPARENT_COLOR;
+            });
 
     }
 
@@ -270,7 +258,7 @@ class TurbineMapVisualization extends Visualization {
             .attr("x", 0)
             .attr("y", 0)
             .attr("width", 300)
-            .attr("height", 200)
+            .attr("height", 240)
             .attr("stroke", "lightgray")
             .attr("stroke-width", 1);
 
@@ -321,23 +309,46 @@ class TurbineMapVisualization extends Visualization {
             .text(d => d);
 
         // Point key
-        const pointLegend = legend
+        const projectPointLegend = legend
             .append("g")
             .selectAll("circle")
             .data([1])
             .enter()
             .append("circle")
-            .attr("r", 3)
-            .attr("fill", "#dca65a")
-            .attr("stroke", "#332301")
-            .attr("stroke-width", 1)
+            .attr("class", "legend-project-point")
+            .attr("r", 10)
+            .attr("fill", PROJECT_VALID_SELECTION_COLOR)
+            .attr("stroke", STROKE_COLOR)
+            .attr("stroke-width", 3)
             .attr("transform", "translate(58, 165)");
 
-        const pointLabel = legend
+        const projectPointLabel = legend
             .append("text")
             .attr("transform", "translate(63, 155)")
             .selectAll("tspan")
             .data(["Location of", "Turbines Projects"])
+            .enter()
+            .append("tspan")
+            .attr("x", 15)
+            .attr("dy", 15)
+            .text(d => d);
+
+        const turbinePointLegend = legend
+            .append("g")
+            .selectAll("circle")
+            .data([1])
+            .enter()
+            .append("circle")
+            .attr("class", "legend-turbine-point")
+            .attr("r", 7)
+            .attr("fill", TURBINE_COLOR)
+            .attr("transform", "translate(58, 205)");
+
+        const turbinePointLabel = legend
+            .append("text")
+            .attr("transform", "translate(63, 195)")
+            .selectAll("tspan")
+            .data(["Location of", "Turbines"])
             .enter()
             .append("tspan")
             .attr("x", 15)
@@ -389,6 +400,7 @@ class TurbineMapVisualization extends Visualization {
         d3.select("#turbine-points").selectAll("*").remove();
 
         if (this.globalTransform.k > ZOOM_TURBINE_LEVEL) {
+            // Filter data based on the spacial location of the current zoom level
             let filtered = this.turbineData.filter(d => {
                 let n = d3.select("#map-background").node().getBBox();
                 let corner1 = [n.x, n.y];
@@ -400,6 +412,7 @@ class TurbineMapVisualization extends Visualization {
                 return inBounds;
             });
 
+            // Draw points
             d3.select("#turbine-points")
                 .selectAll(".turbine")
                 .data(filtered)
@@ -411,8 +424,20 @@ class TurbineMapVisualization extends Visualization {
                     let coord = this.projection([d.xlong, d.ylat]);
                     return "translate(" + coord + ")";
                 });
-        }
 
+
+        }
+        // Fill legend project point based on zoom level
+        d3.selectAll(".legend-project-point")
+            .transition()
+            .attr("fill", d => {
+                console.log(this.globalTransform.k);
+                if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
+                    return PROJECT_VALID_SELECTION_COLOR;
+                }
+                return TRANSPARENT_COLOR;
+            });
+        // Fill project points based on zoom level
         this.projectPoints.transition()
             .attr("fill", d => {
                 let projects = d[1];
