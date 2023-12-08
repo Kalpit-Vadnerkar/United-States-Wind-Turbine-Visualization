@@ -10,6 +10,12 @@ import {
 import {Visualization} from "./Visualization.js";
 import globalEventManager from "./EventManager.js";
 
+const ZOOM_TURBINE_LEVEL = 6;
+const TURBINE_COLOR = "rgb(84,152,0)";
+const PROJECT_VALID_SELECTION_COLOR = "rgb(220, 166, 90)";
+const PROJECT_INVALID_SELECTION_COLOR = "rgb(206,188,182)";
+const TRANSPARENT_COLOR = "rgba(0,0,0,0)";
+const STROKE_COLOR = "rgb(51,35,1)";
 
 function getAvgPosition(datalist) {
     return [d3.mean(datalist, d => d.xlong), d3.mean(datalist, d => d.ylat)];
@@ -28,6 +34,7 @@ class TurbineMapVisualization extends Visualization {
         this.mapData = mapData;
         this.visElement = "#viz1";
         this.globalTransform = {k: 1, x: 0, y: 0};
+        this.globalTransform = d3.zoomIdentity;
         this.colorScale = null;
         this.dataByState = this.calculate();
         this.countByState = {};
@@ -39,10 +46,12 @@ class TurbineMapVisualization extends Visualization {
     }
 
     drawMapAndTurbines(svg, projection, range) {
-        let m = svg.append("g").attr("id", "map");
+        const characterWidth = 9;
+        let mapGroup = svg.append("g").attr("id", "map");
         let pathGenerator = d3.geoPath(projection);
-
-        let path = m.append("path")
+        this.pathGenerator = pathGenerator;
+        let path = mapGroup.append("path")
+            .attr("id", "map-background")
             .attr("d", pathGenerator({type: "Sphere"}))
             .attr("stroke", "gray")
             .attr("fill", "lightblue");
@@ -55,7 +64,7 @@ class TurbineMapVisualization extends Visualization {
             this.colorScale = d3.scaleLinear().domain(range).range(colors);
 
 
-        this.states = m.append("g")
+        this.states = mapGroup.append("g")
             .selectAll(".state")
             .data(this.mapData.features)
             .enter()
@@ -88,14 +97,16 @@ class TurbineMapVisualization extends Visualization {
 
                 tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
 
-                tooltip.selectAll("#map-tooltip-state").text("State: " + i.properties.NAME);
+                let stateLabel = "State: " + i.properties.NAME;
+                let quantityLabel = "Turbines: No Data";
+                tooltip.selectAll("#map-tooltip-state").text(stateLabel);
 
                 if (!EXCLUDED_STATES.includes(STATE_NAME_MAPPING2[i.properties.NAME]))
-                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: " + this.countByState[STATE_NAME_MAPPING2[i.properties.NAME]]);
-                else {
-                    tooltip.selectAll("#map-tooltip-quantity").text("Turbines: No Data");
-                }
+                    quantityLabel = "Turbines: " + this.countByState[STATE_NAME_MAPPING2[i.properties.NAME]];
+                tooltip.selectAll("#map-tooltip-quantity").text(quantityLabel);
+
                 this.states.select("#map-state-" + STATE_NAME_MAPPING2[i.properties.NAME]).attr("stroke", "black").attr("stroke-width", 1);
+                tooltip.select("rect").attr("width", Math.max(stateLabel.length * characterWidth, quantityLabel.length * characterWidth));
             })
             .on("mouseout", (d, i) => {
                 let tooltip = d3.select("#tooltip");
@@ -118,35 +129,38 @@ class TurbineMapVisualization extends Visualization {
             .range([1, 5]); // min and max size of circles
 
 
-        this.points = m.append("g")
-            .selectAll(".point")
+        this.projectPoints = mapGroup.append("g").attr("id", "project-points")
+            .selectAll(".project-point")
             .data(this.projects)
             .enter()
             .append("circle")
             // .attr("class", d => "point point-" + d.t_state)
             .attr("r", d => turbineSizeScale(d[1].length))
             .attr("fill", d => {
+
                 let projects = d[1];
                 let states = projects.map(x => x.t_state);
                 let manufs = projects.map(x => x.t_manu);
 
-                if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
-                    if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
-                        return "rgba(220,166,90,1)";
+                if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
+                    if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                        if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
+                            return PROJECT_VALID_SELECTION_COLOR;
+                        }
                     }
+                    return PROJECT_INVALID_SELECTION_COLOR;
                 }
-                return "rgba(206,188,182,0.05)";
+                return TRANSPARENT_COLOR;
             })
-            .attr("stroke", "#332301")
-            .attr("stroke-width", 1)
+            .attr("stroke", STROKE_COLOR)
+            .attr("stroke-width", 1 / this.globalTransform.k)
             .attr('transform', d => {
                 let pos = getAvgPosition(d[1]);
                 pos = projection(pos);
                 return "translate(" + pos + ")";
             });
 
-
-        this.points
+        this.projectPoints
             .on("mouseover", (d, i) => {
                 let projectName = i[0]
                 let projects = i[1];
@@ -155,12 +169,15 @@ class TurbineMapVisualization extends Visualization {
                 tooltip.transition()
                     .style("opacity", .9);
 
+                let projectLabel = "Project Name: " + projectName;
+                let numProjectLabel = "No. of Turbines: " + projects.length;
                 tooltip.attr("transform", "translate(" + d.offsetX + "," + d.offsetY + ")");
 
-                tooltip.selectAll("#map-tooltip-state").text("Project Name: " + projectName);
-                tooltip.selectAll("#map-tooltip-quantity").text("No. of Turbines: " + projects.length);
+                tooltip.selectAll("#map-tooltip-state").text(projectLabel);
+                tooltip.selectAll("#map-tooltip-quantity").text(numProjectLabel);
 
-                tooltip.attr("width", projectName.length * 20);
+                tooltip.select("rect").attr("width", projectName.length * characterWidth);
+                tooltip.select("rect").attr("width", Math.max(projectLabel.length * characterWidth, numProjectLabel.length * characterWidth));
 
 
             })
@@ -171,8 +188,11 @@ class TurbineMapVisualization extends Visualization {
             });
 
 
+        this.turbinePoints = mapGroup.append("g")
+            .attr("id", "turbine-points");
+
         let title = `Proliferation of ${this.selectedManufacturer === ALL_VALUE ? "" : this.selectedManufacturer} Turbines in ${this.selectedState === ALL_VALUE ? "the USA" : STATE_NAME_MAPPING[this.selectedState]}`;
-        m.append("text")
+        mapGroup.append("text")
             .attr("x", FIRST_COL_DIMENSIONS.width / 2)
             .attr("y", -15)
             .attr("style", VIZ_TITLE_STYLE)
@@ -199,19 +219,21 @@ class TurbineMapVisualization extends Visualization {
                     return "darkgray";
                 });
 
-        if (this.points != null)
-            this.points.transition()
+        if (this.projectPoints != null)
+            this.projectPoints.transition()
                 .attr("fill", d => {
                     let projects = d[1];
                     let states = projects.map(x => x.t_state);
                     let manufs = projects.map(x => x.t_manu);
-
-                    if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
-                        if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
-                            return "rgba(220,166,90,1)";
+                    if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
+                        if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                            if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
+                                return PROJECT_VALID_SELECTION_COLOR;
+                            }
                         }
+                        return PROJECT_INVALID_SELECTION_COLOR;
                     }
-                    return "rgba(206,188,182,0.05)";
+                    return TRANSPARENT_COLOR;
                 });
 
     }
@@ -361,16 +383,67 @@ class TurbineMapVisualization extends Visualization {
 
     }
 
+
+    zoom() {
+
+        d3.select("#turbine-points").selectAll("*").remove();
+
+        if (this.globalTransform.k > ZOOM_TURBINE_LEVEL) {
+            let filtered = this.turbineData.filter(d => {
+                let n = d3.select("#map-background").node().getBBox();
+                let corner1 = [n.x, n.y];
+                let corner2 = [n.x + n.width, n.y + n.height];
+                let p_corner1 = this.globalTransform.invert(corner1);
+                let p_corner2 = this.globalTransform.invert(corner2);
+                let p = this.projection([d.xlong, d.ylat]);
+                let inBounds = p[0] >= p_corner1[0] && p[0] <= p_corner2[0] && p[1] >= p_corner1[1] && p[1] <= p_corner2[1];
+                return inBounds;
+            });
+
+            d3.select("#turbine-points")
+                .selectAll(".turbine")
+                .data(filtered)
+                .enter()
+                .append("circle")
+                .attr("fill", TURBINE_COLOR)
+                .attr("r", 1 / this.globalTransform.k)
+                .attr('transform', d => {
+                    let coord = this.projection([d.xlong, d.ylat]);
+                    return "translate(" + coord + ")";
+                });
+        }
+
+        this.projectPoints.transition()
+            .attr("fill", d => {
+                let projects = d[1];
+                let states = projects.map(x => x.t_state);
+                let manufs = projects.map(x => x.t_manu);
+
+                if (this.globalTransform.k < ZOOM_TURBINE_LEVEL) {
+                    if (this.selectedState === ALL_VALUE || states.includes(this.selectedState)) {
+                        if (this.selectedManufacturer === ALL_VALUE || manufs.includes(this.selectedManufacturer)) {
+                            return PROJECT_VALID_SELECTION_COLOR;
+                        }
+                    }
+                    return PROJECT_INVALID_SELECTION_COLOR;
+                }
+                return TRANSPARENT_COLOR;
+            })
+            .attr("stroke-width", 1 / this.globalTransform.k);
+    }
+
     draw() {
 
         const width = FIRST_COL_DIMENSIONS.width;
 
         // Define zoom behavior
         let zoom = d3.zoom()
-            .scaleExtent([1, 8])  // Set min and max scale extent
+            .scaleExtent([1, 15])  // Set min and max scale extent
             .translateExtent([[0, 0], [width, FIRST_COL_DIMENSIONS.height]])
             .on("zoom", (event) => {
-                d3.select("#map").attr("transform", event.transform);
+                this.globalTransform = event.transform;
+                d3.select("#map").attr("transform", this.globalTransform);
+                this.zoom();
             });
 
         // Apply zoom behavior to the SVG
@@ -389,6 +462,7 @@ class TurbineMapVisualization extends Visualization {
             return coords != null;
         });
 
+        this.projection = projection;
 
         let maxCount = Math.max(...Object.values(this.countByState));
         let minCount = Math.min(...Object.values(this.countByState));
