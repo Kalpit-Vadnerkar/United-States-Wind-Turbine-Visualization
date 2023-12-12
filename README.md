@@ -3,6 +3,6 @@ The chosen dataset offers a comprehensive overview of the locations and technica
 
 View Live demo [here](https://kalpit-vadnerkar.github.io/United-States-Wind-Turbine-Visualization/)
 
-Process Book:
+Link to [Process Book](https://github.com/Kalpit-Vadnerkar/United-States-Wind-Turbine-Visualization/blob/main/Process%20Book.pdf)
 
-Video Demonstration: 
+Link to [Video Demonstration](https://drive.google.com/file/d/18RIXa-c4_9GiFxmaDdRVJbCHwU56Tq5l/view?usp=drive_link)
