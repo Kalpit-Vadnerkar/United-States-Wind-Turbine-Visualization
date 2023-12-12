@@ -9,6 +9,9 @@ main {
     /*padding: 20px;*/
 }
 
+a{
+    color: #04afaf;
+}
 fieldset {
     margin: 4px;
 }
